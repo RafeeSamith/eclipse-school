@@ -1,0 +1,179 @@
+#accountManagement.py
+'''Extension file that holds all the functions for account management, of both employees and users.'''
+
+import pickle
+import os
+from fileHandling import findInFile
+
+#Functions
+
+def setCurrentEmp(emp):
+    global currentEmp
+    currentEmp = emp
+
+### Universal ###
+
+#Display All Accounts
+def displayAccounts(type):
+    '''Display all recorded accounts'''
+
+    print("------------------------------\n"
+    "Accounts:\n")
+    with open(f"accounts_{type}.dat", "rb") as accountsFile:
+        try:
+            while True:
+                print(pickle.load(accountsFile))
+        except EOFError:
+            print("------------------------------")
+
+#Search Account
+def searchAccount(type):
+    global currentEmp
+    selector = {"emp": "", "user": "username or "}                 #Used this to dynamically change how the function behaves, reusing it for two purposes
+    currentSelect = selector[type]
+
+    term = input(f"Enter {currentSelect}email: ").lower()
+    with open(f"accounts_{type}.dat", "rb") as accountsFile:
+        fif = findInFile(term, accountsFile)
+
+        if not fif["found"]:
+            print("Account not found.")
+        else:
+            print(f"Account found, details are given below\n    {fif['rec']}")
+
+#Modify Account
+def modifyAccount(type):
+    global currentEmp
+    selector = {"emp": "empno", "user": "username"}
+    currentSelect = selector[type]
+    with open(f"accounts_{type}.dat", "rb+") as accountsFile:
+        found = 0
+        try:
+            if type == "user":
+                term = input(f"Enter {currentSelect} or email: ").lower()
+                while not found:
+                    pos = accountsFile.tell()
+                    rec = pickle.load(accountsFile)
+                    if rec["user"] == term or rec["email"] == term:
+                        found = 1
+                
+                else:
+                    print("Account found, enter new details below", rec)
+
+                    #Type
+                    type = input("Enter type (Regular, VIP): ").lower()
+                    if type != "vip":
+                        type = "regular"
+
+                    #New balance
+                    balance = float(input("Enter new balance: "))
+
+                    accountsFile.seek(pos)
+                    rec["type"] = type
+                    rec["balance"] = balance
+                    pickle.dump(rec, accountsFile)
+            else:
+                term = input(f"Enter {currentSelect} or email: ").lower()
+                while term == currentEmp["email"] or int(term) == currentEmp["empno"]:    #Checks if employee is trying to change their own position
+                    print("Can't change your own position.")
+                    term = input(f"Enter {currentSelect} or email: ").lower()
+                
+                else:
+                    while not found:
+                        pos = accountsFile.tell()
+                        rec = pickle.load(accountsFile)
+                        if rec["empno"] == int(term) or rec["email"] == term:
+                            found = 1
+                    else:
+                        if roleHier.index(currentEmp["role"]) < roleHier.index(rec["role"]):
+                            print("Cannot modify role of higher employee.")
+                            return
+                        
+                        role = input(f"Account found, enter new role below \n{rec}\n")
+                        while role not in roleHier: #Makes sure role is valid
+                            role = input("Invalid role, enter new role: ")
+                        
+                        while roleHier.index(role) >= roleHier.index(currentEmp["role"]):    #Makes sure employee isn't allowed to promote someone to their position or higher 
+                            print("Cannot promote employee higher than your own position.")
+                            role = input("Enter new role: ")
+
+                        accountsFile.seek(pos)
+                        rec["role"] = role
+                        pickle.dump(rec, accountsFile)
+        except EOFError:
+                print("Account not found.")
+
+#Delete Account
+def deleteAccount(type):    #TODO Make sure employee can't delete account with a higher position
+    global currentEmp
+    selector = {"emp": "empno", "user": "username"}                 #Used this to dynamically change how the function behaves, reusing it for two purposes
+    currentSelect = selector[type]
+
+    term = input(f"Enter {currentSelect} or email: ").lower()
+
+    if type == "emp":
+        while term == currentEmp["email"] or int(term) == currentEmp["empno"]:
+            print("Can't delete your own account.")
+            term = input(f"Enter {currentSelect} or email: ").lower()
+
+    oldAccountsFile = open(f"accounts_{type}.dat", "rb")
+    newAccountsFile = open("temp.dat", "wb")
+
+    found = 0
+    try:
+        while True:
+            rec = pickle.load(oldAccountsFile)
+            if rec["email"] != term and rec[currentSelect] != int(term):
+                pickle.dump(rec, newAccountsFile)
+            else:
+                selectedRec = rec
+                found = 1
+    except EOFError:
+        oldAccountsFile.close()
+        newAccountsFile.close()
+        if not found:
+            print("Account was not found.")
+            os.remove("temp.dat")
+        else:
+            confirm = input(f"Account found, confirm delete? (y/n)\n    {selectedRec}\n")
+            if confirm != "y":
+                os.remove("temp.dat")
+            else:
+                os.remove(f"accounts_{type}.dat")
+                os.rename("temp.dat", f"accounts_{type}.dat")
+
+### Universal End ###
+
+### User ###
+
+#New Account
+def newAccount_user():
+    with open("accounts_user.dat", "ab+") as accountsFile:
+        #Username
+        user = input("Enter username: ").lower()
+        while findInFile(user, accountsFile)["found"]:    #Repeat input until unique
+            print("User already exists.")
+            user = input("Enter username: ").lower()
+
+        #Email ID
+        email = input("Enter email ID: ").lower()
+        while findInFile(email, accountsFile)["found"]:    #Repeat input until unique
+            print("User already exists.")
+            user = input("Enter username: ").lower()
+
+        #Type
+        type = input("Enter type (Regular, VIP): ").lower()
+        if type != "vip":
+            type = "regular"
+
+        #Initial balance
+        balance = float(input("Enter initial balance: "))
+
+        rec = {"user" : user, "email" : email, "type" : type, "balance" : balance}
+        pickle.dump(rec, accountsFile)
+
+### User End ###
+
+#Constants
+currentEmp = {}
+roleHier = ("guest", "manager", "admin")    #Role hierarchy
