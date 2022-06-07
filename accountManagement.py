@@ -74,15 +74,15 @@ def modifyAccount(type):
                     pickle.dump(rec, accountsFile)
             else:
                 term = input(f"Enter {currentSelect} or email: ").lower()
-                while term == currentEmp["email"] or int(term) == currentEmp["empno"]:    #Checks if employee is trying to change their own position
-                    print("Can't change your own position.")
+                while term == currentEmp["email"] or term == str(currentEmp["empno"]):    #Checks if employee is trying to change their own position
+                    print("Cannot change your own position.")
                     term = input(f"Enter {currentSelect} or email: ").lower()
                 
                 else:
                     while not found:
                         pos = accountsFile.tell()
                         rec = pickle.load(accountsFile)
-                        if rec["empno"] == int(term) or rec["email"] == term:
+                        if str(rec["empno"]) == term or rec["email"] == term:
                             found = 1
                     else:
                         if roleHier.index(currentEmp["role"]) < roleHier.index(rec["role"]):
@@ -112,8 +112,8 @@ def deleteAccount(type):    #TODO Make sure employee can't delete account with a
     term = input(f"Enter {currentSelect} or email: ").lower()
 
     if type == "emp":
-        while term == currentEmp["email"] or int(term) == currentEmp["empno"]:
-            print("Can't delete your own account.")
+        while term == currentEmp["email"] or term == str(currentEmp["empno"]):
+            print("Cannot delete your own account.")
             term = input(f"Enter {currentSelect} or email: ").lower()
 
     oldAccountsFile = open(f"accounts_{type}.dat", "rb")
@@ -123,7 +123,7 @@ def deleteAccount(type):    #TODO Make sure employee can't delete account with a
     try:
         while True:
             rec = pickle.load(oldAccountsFile)
-            if rec["email"] != term and rec[currentSelect] != int(term):
+            if rec["email"] != term and str(rec[currentSelect]) != term:
                 pickle.dump(rec, newAccountsFile)
             else:
                 selectedRec = rec
@@ -135,6 +135,10 @@ def deleteAccount(type):    #TODO Make sure employee can't delete account with a
             print("Account was not found.")
             os.remove("temp.dat")
         else:
+            if type == "emp" and roleHier.index(selectedRec["role"]) > roleHier.index(currentEmp["role"]):
+                print("Cannot delete employee account higher than you.")
+                return
+
             confirm = input(f"Account found, confirm delete? (y/n)\n    {selectedRec}\n")
             if confirm != "y":
                 os.remove("temp.dat")

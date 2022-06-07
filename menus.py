@@ -177,6 +177,7 @@ def manageAccountMenu_emp():
                 "Enter choice: "
             ))
 
+
             if ch == 1:
                 accountManagement.displayAccounts("emp")
             elif ch == 2:
