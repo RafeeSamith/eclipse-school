@@ -185,7 +185,7 @@ def manageAccountMenu_emp():
             elif ch == 3:
                 accountManagement.modifyAccount("emp")
             elif ch == 4:
-                accountManagement.deleteAccount("emp")    #TODO: Make sure employee can't delete their own account
+                accountManagement.deleteAccount("emp")
 
 #User Account Management Menu
 def manageAccountMenu_user():

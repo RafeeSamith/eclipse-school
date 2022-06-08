@@ -104,7 +104,7 @@ def modifyAccount(type):
                 print("Account not found.")
 
 #Delete Account
-def deleteAccount(type):    #TODO Make sure employee can't delete account with a higher position
+def deleteAccount(type):
     global currentEmp
     selector = {"emp": "empno", "user": "username"}                 #Used this to dynamically change how the function behaves, reusing it for two purposes
     currentSelect = selector[type]
