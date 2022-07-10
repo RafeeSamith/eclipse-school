@@ -5,6 +5,7 @@ import pickle
 import accountManagement
 from fileHandling import findInFile
 from accountManagement import setCurrentEmp
+from ticketManagement import createTicket, displayTickets
 
 #Functions
 
@@ -115,19 +116,20 @@ def createEmpAccount():
 #Main Menu
 def mainMenu():
     ch = 0  
-    while ch != 5:
+    while ch != 4:
         ch = int(input(
             "----------------------------\n"
             "1. Account Management\n"
-            "2.\n"
-            "3. Log Out\n"
+            "2. Ticket Management\n"
+            "3. About\n"
+            "4. Log Out\n"
             "----------------------------\n"
             "Enter choice: "))
 
         if ch == 1:
             manageAccountMenu_pre()
         elif ch == 2:
-            pass
+            manageTickets()
         elif ch == 3:
             about()
         else:
@@ -138,10 +140,16 @@ def about():
     print("""
     Eclipse
     
-    This is a project for a computer lounge management software by Rafee for Gulf Indian School. This program z""")
+    This is a project for a computer lounge management software by me for my school (which will remain unnamed as this is a public repo). 
+    
+    This program features accounts for employees, customers and a management system for these accounts with necessary privileges """)
 
 #Pre-Account Management Menu
 def manageAccountMenu_pre():
+    if roleHier.index(currentEmp["role"]) < roleHier.index("manager"):
+        print("Access Denied. Only managers and above can access this section.")
+        return 
+
     ch = 0
     while ch != 3:
         ch = int(input(
@@ -160,32 +168,27 @@ def manageAccountMenu_pre():
 
 #Employee Account Management Menu
 def manageAccountMenu_emp():
-    if roleHier.index(currentEmp["role"]) < 1:  #Checks if employee's role is below 1 (Manager) in the hierarchy
-        print("Access Denied.")
-        return
-    else:
-        ch = 0
-        while ch != 5:
-            ch = int(input(
-                "-------------------------\n"
-                "1. Display Accounts\n"
-                "2. Search Account\n"
-                "3. Change Position\n"
-                "4. Delete Account\n"
-                "5. Back\n"
-                "-------------------------\n"
-                "Enter choice: "
-            ))
+    ch = 0
+    while ch != 5:
+        ch = int(input(
+            "-------------------------\n"
+            "1. Display Accounts\n"
+            "2. Search Account\n"
+            "3. Change Position\n"
+            "4. Delete Account\n"
+            "5. Back\n"
+            "-------------------------\n"
+            "Enter choice: "
+        ))
 
-
-            if ch == 1:
-                accountManagement.displayAccounts("emp")
-            elif ch == 2:
-                accountManagement.searchAccount("emp")
-            elif ch == 3:
-                accountManagement.modifyAccount("emp")
-            elif ch == 4:
-                accountManagement.deleteAccount("emp")
+        if ch == 1:
+            accountManagement.displayAccounts("emp")
+        elif ch == 2:
+            accountManagement.searchAccount("emp")
+        elif ch == 3:
+            accountManagement.modifyAccount("emp")
+        elif ch == 4:
+            accountManagement.deleteAccount("emp")
 
 #User Account Management Menu
 def manageAccountMenu_user():
@@ -214,6 +217,27 @@ def manageAccountMenu_user():
         elif ch == 5:
             accountManagement.deleteAccount("user")
 
+#Ticket Management Menu
+def manageTickets():
+    if roleHier.index(currentEmp["role"]) < roleHier.index("cashier"):
+        print("Access Denied. Only cashier or higher can access this section.")
+        return
+
+    ch = 0
+    while ch != 4:
+        ch = int(input(
+            "1. Create Ticket\n"
+            "2. Refund Ticket\n"
+            "3. Display Tickets\n"
+            "4. Exit\n"
+            "Enter choice: "
+        )) 
+ 
+        if ch == 1:
+            createTicket()
+        elif ch == 3:
+            displayTickets()
+
 #Constants
 
-roleHier = ("guest", "manager", "admin")    #Role hierarchy
+roleHier = ("guest", "cashier", "manager", "admin")    #Role hierarchy

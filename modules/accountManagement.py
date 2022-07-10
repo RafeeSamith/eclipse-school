@@ -3,7 +3,7 @@
 
 import pickle
 import os
-from fileHandling import findInFile
+from modules.fileHandling import displayFile, findInFile
 
 #Functions
 
@@ -20,11 +20,8 @@ def displayAccounts(type):
     print("------------------------------\n"
     "Accounts:\n")
     with open(f"accounts_{type}.dat", "rb") as accountsFile:
-        try:
-            while True:
-                print(pickle.load(accountsFile))
-        except EOFError:
-            print("------------------------------")
+        displayFile(accountsFile)
+    print("------------------------------")
 
 #Search Account
 def searchAccount(type):
@@ -46,6 +43,7 @@ def modifyAccount(type):
     global currentEmp
     selector = {"emp": "empno", "user": "username"}
     currentSelect = selector[type]
+    
     with open(f"accounts_{type}.dat", "rb+") as accountsFile:
         found = 0
         try:
@@ -66,7 +64,8 @@ def modifyAccount(type):
                         type = "regular"
 
                     #New balance
-                    balance = float(input("Enter new balance: "))
+                    balance += float(input("Enter balance to add: "))
+                    
 
                     accountsFile.seek(pos)
                     rec["type"] = type
@@ -106,7 +105,7 @@ def modifyAccount(type):
 #Delete Account
 def deleteAccount(type):
     global currentEmp
-    selector = {"emp": "empno", "user": "username"}                 #Used this to dynamically change how the function behaves, reusing it for two purposes
+    selector = {"emp": "empno", "user": "user"}                 #Used this to dynamically change how the function behaves, reusing it for two purposes
     currentSelect = selector[type]
 
     term = input(f"Enter {currentSelect} or email: ").lower()
@@ -126,7 +125,7 @@ def deleteAccount(type):
             if rec["email"] != term and str(rec[currentSelect]) != term:
                 pickle.dump(rec, newAccountsFile)
             else:
-                selectedRec = rec
+                selectedRec = rec   
                 found = 1
     except EOFError:
         oldAccountsFile.close()
@@ -172,6 +171,8 @@ def newAccount_user():
 
         #Initial balance
         balance = float(input("Enter initial balance: "))
+        while balance < 0:
+            balance = float(input("Balance cannot be negative. \nEnter initial balance: "))
 
         rec = {"user" : user, "email" : email, "type" : type, "balance" : balance}
         pickle.dump(rec, accountsFile)
@@ -180,4 +181,4 @@ def newAccount_user():
 
 #Constants
 currentEmp = {}
-roleHier = ("guest", "manager", "admin")    #Role hierarchy
+roleHier = ("guest", "cashier", "manager", "admin")    #Role hierarchy

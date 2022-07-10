@@ -1,0 +1,11 @@
+Ticket System
+
+Data:
+-User 
+-Money paid 
+-Date and time bought
+-Time bought 
+-Discounts(?)
+
+-Create new ticket (user, paid, time (calculated),)
+-Modify session (extend length, change computer)    

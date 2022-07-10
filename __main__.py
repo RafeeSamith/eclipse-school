@@ -1,5 +1,5 @@
 '''RUN THIS FILE'''
 
-import menus
+from modules import tkmenus
 
-menus.firstMenu()
+tkmenus.firstMenu()
