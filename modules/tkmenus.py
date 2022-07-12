@@ -2,9 +2,12 @@
 '''Library that holds all the Tkinter GUI menus'''
 
 import pickle
+from tkinter.font import Font
 from modules.fileHandling import findInFile
 from tkinter import *
 import modules.accountManagement as accountManagement
+import webbrowser
+
 
 #Functions
 def firstMenu():
@@ -30,9 +33,9 @@ def login():
     global currentEmp
 
     #Create Frames
-    navFrame = Frame(window, bg = bgBlue)
-    navFrame.pack(anchor = "nw")
-    frame = Frame(window, bg = bgBlue)
+    outerFrame = Frame(window, bg = bgBlue)
+    outerFrame.pack(expand = True, fill = "both")
+    frame = Frame(outerFrame, bg = bgBlue)
     frame.pack()
 
     #Show error function
@@ -63,13 +66,13 @@ def login():
                 currentEmp = fifEmail["rec"]
                 accountManagement.setCurrentEmp(currentEmp)
 
-                navFrame.destroy()
+                outerFrame.destroy()
                 frame.destroy()
                 mainMenu()
 
     #Back button
-    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = bgBlue, activebackground = bgBlueLight, activeforeground = "#FF4800", fg = "#eee", relief = "flat", command = lambda:[navFrame.destroy(), frame.destroy(), firstMenu()])
-    backButton.pack(anchor = "nw")
+    backButton = Button(outerFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = bgBlue, activebackground = bgBlueLight, activeforeground = "#FF4800", fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[outerFrame.destroy(), frame.destroy(), firstMenu()])
+    backButton.pack(before = frame, anchor = "nw")
 
     #Header
     header = Label(frame, text = "Log In", font = "Comfortaa 24", bg = bgBlue, fg = "#eee")
@@ -101,9 +104,9 @@ def login():
 def signUp():
 
     #Create frames
-    navFrame = Frame(window, bg = bgBlue)
-    navFrame.pack(anchor = "nw")
-    frame = Frame(window, bg = bgBlue)
+    outerFrame = Frame(window, bg = bgBlue)
+    outerFrame.pack(expand = True, fill = "both")
+    frame = Frame(outerFrame, bg = bgBlue)
     frame.pack()
     
     #Show error function
@@ -138,14 +141,14 @@ def signUp():
             rec = {"empno": empno, "email": email, "password": password, "role": "guest"}
             pickle.dump(rec, accountsFile)
 
-            navFrame.destroy()
+            outerFrame.destroy()
             frame.destroy()
             mainMenu()
 
 
     #Back button
-    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = bgBlue, activebackground = bgBlueLight, fg = "#eee", activeforeground = "#FF4800", relief = "flat", command = lambda:[navFrame.destroy(), frame.destroy(), firstMenu()])
-    backButton.pack(anchor = "nw")
+    backButton = Button(outerFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = bgBlue, activebackground = bgBlueLight, fg = "#eee", activeforeground = "#FF4800", relief = "flat", borderwidth = 0, command = lambda:[outerFrame.destroy(), frame.destroy(), firstMenu()])
+    backButton.pack(before = frame, anchor = "nw")
 
     #Header
     header = Label(frame, text = "Sign Up", font = "Comfortaa 24", bg = bgBlue, fg = "#eee")
@@ -177,24 +180,25 @@ def signUp():
 def mainMenu():
 
     #Create frames
-    navFrame = Frame(window, bg = bgBlue)
-    navFrame.pack(anchor = "nw")
-    frame = Frame(window, bg = bgBlue)
+    outerFrame = Frame(window, bg = bgBlue)
+    outerFrame.pack(expand = True, fill = "both")
+    frame = Frame(outerFrame, bg = bgBlue)
     frame.pack()
-
-    #Back button
-    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = bgBlue, activebackground = bgBlueLight, fg = "#eee", activeforeground = "#FF4800", relief = "flat", command = lambda:[navFrame.destroy(), frame.destroy(), firstMenu()])
-    backButton.pack(anchor = "nw")
 
     #Header
     header = Label(frame, text = "Main Menu", font = "Comfortaa 24", bg = bgBlue, fg = "#eee")
-    header.pack(anchor="center")
+    header.pack(anchor="center", pady = (48, 0))
 
-                #Github
-    githubButton = Button(image = github, bg = bgBlue)
-    githubButton.pack()
+    a = Button(frame, width = 30, font = "Montserrat 10", pady = 4, text = "Account Management").pack(pady = (16, 2))
+    b = Button(frame, width = 30, font = "Montserrat 10", pady = 4, text = "Ticket Management").pack(pady = 2)
+    c = Button(frame, width = 30, font = "Montserrat 10", pady = 4, text = "About").pack(pady = 2)
+    d = Button(frame, width = 30, font = "Montserrat 10", pady = 4, text = "Log Out").pack(pady = 2)
 
+    #Github
+    githubButton = Button(outerFrame, image = github, bg = bgBlue, relief = "flat", command = lambda:webbrowser.open_new_tab("https://github.com/rafeesamith"))
+    githubButton.pack(anchor = "se", side = "bottom")
 
+    window.mainloop()
 
 
 

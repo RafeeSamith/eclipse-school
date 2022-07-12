@@ -2,4 +2,4 @@
 
 from modules import tkmenus
 
-tkmenus.firstMenu()
+tkmenus.mainMenu()
