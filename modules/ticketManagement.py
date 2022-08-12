@@ -2,8 +2,8 @@
 '''Extension file that holds all the functions for ticket management'''
 
 import pickle
-from re import L
-from fileHandling import displayFile, findInFile, modifyFile
+
+from modules.fileHandling import displayFile, findInFile, modifyFile
 import time
 
 #Functions
@@ -14,7 +14,7 @@ def createTicket():
 
     discountDict = {"regular": 1, "vip": 1.05}               #5% discount for VIP
 
-    with open("tickets.dat", "ab+") as ticketsFile, open("accounts_user.dat", "rb+") as accountsFile:
+    with open("data/tickets.dat", "ab+") as ticketsFile, open("data/accounts_user.dat", "rb+") as accountsFile:
         user = input("Enter user: ")
         foundUser = findInFile(user, accountsFile)
         while not foundUser["found"]:                       #Finds user in account database
@@ -55,7 +55,7 @@ def displayTickets():
     '''Display all recorded tickets'''
     print("------------------------------\n"
     "Tickets:\n")
-    with open("tickets.dat", "rb") as ticketsFile:
+    with open("data/tickets.dat", "rb") as ticketsFile:
         displayFile(ticketsFile)
     print("------------------------------")
 

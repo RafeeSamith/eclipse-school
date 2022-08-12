@@ -1,11 +1,11 @@
 #menus.py
 '''Library that (temporarily) holds all the menus of the program'''
 
+import modules
 import pickle
-import accountManagement
-from fileHandling import findInFile
-from accountManagement import setCurrentEmp
-from ticketManagement import createTicket, displayTickets
+from modules.fileHandling import findInFile
+from modules.accountManagement import setCurrentEmp
+from modules.ticketManagement import createTicket, displayTickets
 
 #Functions
 
@@ -44,7 +44,7 @@ def login():
         "------------------------------"
     )
 
-    with open("accounts_emp.dat", "rb") as accountsFile:
+    with open("data/accounts_emp.dat", "rb") as accountsFile:
         email = input("Enter email ID (< to exit): ")
         if email == "<":
             return
@@ -76,14 +76,14 @@ def login():
                     return
             
             currentEmp = fif["rec"]
-            accountManagement.setCurrentEmp(currentEmp)
+            modules.accountManagement.setCurrentEmp(currentEmp)
             print(f"Logged in as {currentEmp['email']} ({currentEmp['role']})\n")   #A little messy, the second f-string gets the employee type from the rec value returned by fif
 
     mainMenu()
 
 #Create Account Menu
-def createEmpAccount():
-    with open("accounts_emp.dat", "ab+") as empAccountsFile:
+#def createEmpAccount():
+    with open("data/accounts_emp.dat", "ab+") as empAccountsFile:
         empno = 0
 
         email = input("Enter email ID (< to exit): ")
@@ -136,7 +136,7 @@ def mainMenu():
             print("Invalid choice")
 
 #About
-def about():
+#def about():
     print("""
     Eclipse
     
@@ -167,7 +167,7 @@ def manageAccountMenu_pre():
             manageAccountMenu_user()
 
 #Employee Account Management Menu
-def manageAccountMenu_emp():
+#def manageAccountMenu_emp():
     ch = 0
     while ch != 5:
         ch = int(input(
@@ -182,13 +182,13 @@ def manageAccountMenu_emp():
         ))
 
         if ch == 1:
-            accountManagement.displayAccounts("emp")
+           modules.accountManagement.displayAccounts("emp")
         elif ch == 2:
-            accountManagement.searchAccount("emp")
+           modules.accountManagement.searchAccount("emp")
         elif ch == 3:
-            accountManagement.modifyAccount("emp")
+           modules.accountManagement.modifyAccount("emp")
         elif ch == 4:
-            accountManagement.deleteAccount("emp")
+           modules.accountManagement.deleteAccount("emp")
 
 #User Account Management Menu
 def manageAccountMenu_user():
@@ -207,18 +207,18 @@ def manageAccountMenu_user():
         ))
         
         if ch == 1:
-            accountManagement.displayAccounts("user")
+           modules.accountManagement.displayAccounts("user")
         elif ch == 2:
-            accountManagement.newAccount_user()
+           modules.accountManagement.newAccount_user()
         elif ch == 3:
-            accountManagement.searchAccount("user")
+           modules.accountManagement.searchAccount("user")
         elif ch == 4:
-            accountManagement.modifyAccount_user("user")
+           modules.accountManagement.modifyAccount_user("user")
         elif ch == 5:
-            accountManagement.deleteAccount("user")
+           modules.accountManagement.deleteAccount("user")
 
 #Ticket Management Menu
-def manageTickets():
+#def manageTickets():
     if roleHier.index(currentEmp["role"]) < roleHier.index("cashier"):
         print("Access Denied. Only cashier or higher can access this section.")
         return

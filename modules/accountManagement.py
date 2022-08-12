@@ -19,7 +19,7 @@ def displayAccounts(type):
 
     print("------------------------------\n"
     "Accounts:\n")
-    with open(f"accounts_{type}.dat", "rb") as accountsFile:
+    with open(f"data/accounts_{type}.dat", "rb") as accountsFile:
         displayFile(accountsFile)
     print("------------------------------")
 
@@ -30,7 +30,7 @@ def searchAccount(type):
     currentSelect = selector[type]
 
     term = input(f"Enter {currentSelect}email: ").lower()
-    with open(f"accounts_{type}.dat", "rb") as accountsFile:
+    with open(f"data/accounts_{type}.dat", "rb") as accountsFile:
         fif = findInFile(term, accountsFile)
 
         if not fif["found"]:
@@ -44,7 +44,7 @@ def modifyAccount(type):
     selector = {"emp": "empno", "user": "username"}
     currentSelect = selector[type]
     
-    with open(f"accounts_{type}.dat", "rb+") as accountsFile:
+    with open(f"data/accounts_{type}.dat", "rb+") as accountsFile:
         found = 0
         try:
             if type == "user":
@@ -115,8 +115,8 @@ def deleteAccount(type):
             print("Cannot delete your own account.")
             term = input(f"Enter {currentSelect} or email: ").lower()
 
-    oldAccountsFile = open(f"accounts_{type}.dat", "rb")
-    newAccountsFile = open("temp.dat", "wb")
+    oldAccountsFile = open(f"data/accounts_{type}.dat", "rb")
+    newAccountsFile = open("data/temp.dat", "wb")
 
     found = 0
     try:
@@ -151,7 +151,7 @@ def deleteAccount(type):
 
 #New Account
 def newAccount_user():
-    with open("accounts_user.dat", "ab+") as accountsFile:
+    with open("data/accounts_user.dat", "ab+") as accountsFile:
         #Username
         user = input("Enter username: ").lower()
         while findInFile(user, accountsFile)["found"]:    #Repeat input until unique

@@ -2,4 +2,5 @@
 
 from modules import tkmenus
 
-tkmenus.mainMenu()
+tkmenus.displayTickets({"empno": 0, "email": "test", "role": "admin"})
+
