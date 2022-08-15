@@ -272,7 +272,6 @@ def displayTickets(emp):
     frame = Frame(window, bg = primaryColor)
     frame.pack(anchor = "n", side = "top")
     navFrame = Frame(frame, bg = primaryColor)
-    #navFrame.pack(fill = "x", anchor = "n", side = "top")
     navFrame.grid(row = 0, column = 0, sticky = "nw")
 
     #Back button
@@ -299,6 +298,14 @@ def displayTickets(emp):
     
     #Ticket Headers
     headerList = ["User", "Paid", "Time", "Discount", "Time Created"]
+
+    #Next Page button
+    nextPageButton = Button(frame, text = "▶", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0)
+    nextPageButton.grid(row = 99, column = 99)
+
+    #Next Page button
+    prevPageButton = Button(frame, text = "▶", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0)
+    prevPageButton.grid(row = 99, column = 98)
 
     for i in range(5):
         headerStr = StringVar()
