@@ -1,8 +1,6 @@
 #tkmenus.py
 '''Library that holds all the Tkinter GUI menus'''
 
-from cmath import exp
-from email.base64mime import header_encode
 import pickle
 import time
 from tkinter.font import Font
@@ -211,7 +209,7 @@ def mainMenu(emp):
     #Buttons
     accButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Account Management")
     accButton.pack(pady = (16, 2))
-    ticketButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Ticket Management")
+    ticketButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Ticket Management", command = lambda: [outerFrame.destroy(), frame.destroy(), ticketManagement(currentEmp)])
     ticketButton.pack(pady = 2)
     aboutButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "About")
     aboutButton.pack(pady = 2)
@@ -257,33 +255,23 @@ def ticketManagement(emp):
     header.pack(anchor = "n")
     
     #Buttons
-    createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Create Ticket")
+    createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Create Ticket", command = lambda:[navFrame.destroy(), frame.destroy(), createTicket()])
     createButton.pack(pady = (16, 2))
     refundButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Refund Ticket")
     refundButton.pack(pady = 2)
-    displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Display Tickets")
+    displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Display Tickets", command = lambda:[navFrame.destroy(), frame.destroy(), displayTickets()])
     displayButton.pack(pady = 2)
 
     window.mainloop()
 
+
+currentPage = 0
+
 #Display Tickets
-def displayTickets(emp):
-
-    frame = Frame(window, bg = primaryColor)
-    frame.pack(anchor = "n", side = "top")
-    navFrame = Frame(frame, bg = primaryColor)
-    navFrame.grid(row = 0, column = 0, sticky = "nw")
-
-    #Back button
-    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), mainMenu(currentEmp)])
-    backButton.pack(anchor = "nw", side = "left")
-
-    #Header
-    header = Label(frame, text = "Tickets", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
-    header.grid(row = 1, column = 0, sticky = "nsew")
-    header.grid_configure(columnspan = 10)
+def displayTickets():
 
     ticketList = []
+
 
     with open("data/tickets.dat", "rb") as ticketsFile:
         try:
@@ -296,46 +284,70 @@ def displayTickets(emp):
         except EOFError:
             pass
     
+    def pages(page):
+        global currentPage
+        totalPages = len(ticketList) // 12
+
+        if page == "next" and currentPage < totalPages:
+            currentPage += 1
+        elif page == "prev" and currentPage > 0:
+            currentPage -= 1
+        elif page == "refresh":
+            currentPage = 0
+
+        x = (currentPage*12)
+        for i in range(0, 12):
+            for j in range(0, 5):
+                try:
+                    ticketStr = StringVar()
+                    ticketStr.set(ticketList[i+x][j])
+                    entr = Entry(frame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 10", state = "readonly", textvariable = ticketStr)
+                    entr.grid(row = i+3, column = j)
+                except IndexError:
+                    entr.insert(0, "")
+
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(frame, bg = primaryColor)
+    navFrame.grid(row = 0, column = 0, sticky = "nw")
+
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), window.geometry("640x360"), ticketManagement(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "Tickets", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.grid(row = 1, column = 0, sticky = "nsew")
+    header.grid_configure(columnspan = 10)
+
     #Ticket Headers
     headerList = ["User", "Paid", "Time", "Discount", "Time Created"]
 
-    #Next Page button
-    nextPageButton = Button(frame, text = "▶", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0)
-    nextPageButton.grid(row = 99, column = 99)
+    pageButtonFrame = Frame(frame, bg = "#f00")
+    pageButtonFrame.grid(row = 15, sticky = "e")
+    pageButtonFrame.grid_configure(columnspan = 100)
 
     #Next Page button
-    prevPageButton = Button(frame, text = "▶", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0)
-    prevPageButton.grid(row = 99, column = 98)
+    nextPageButton = Button(pageButtonFrame, text = "▶", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("next")])
+    nextPageButton.pack(side = "right")
+
+    #Previous Page button
+    prevPageButton = Button(pageButtonFrame, text = "◀", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("prev")])
+    prevPageButton.pack(side = "right")
+
 
     for i in range(5):
         headerStr = StringVar()
         headerStr.set(headerList[i])
         Entry(frame, readonlybackground = primaryColor, fg = accentColor, font = "Montserrat 10 bold", state = "readonly", textvariable = headerStr).grid(row = 2, column = i)
-    
-    def pages(page):
-        x = (page*12)
-        for i in range(x, x+12):
-            entr = Entry(frame, font = "Montserrat 10")
-            entr.grid(row = i+3)
-            entr.insert(0, i)
+        
+    pages("refresh")
 
-
-    pages(1)
-    
-
-    #Ticket Details Loop
-    #for i in range(len(ticketList)):
-    #    for j in range(5):
-    #        
-    #        ticketStr = StringVar()
-    #        ticketStr.set(ticketList[i][j])
-    #        Entry(frame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 10", state = "readonly", textvariable = ticketStr).grid(row = i+2, column = j)
-    
     window.geometry("960x480")
     window.mainloop()
 
 #Create Ticket
-def createTicket(emp):
+def createTicket():
 
     accType = "regular"
     discountDict = {"regular": 1, "vip": 1.05}               #5% discount for VIP
@@ -418,8 +430,23 @@ def createTicket(emp):
             userRec["balance"] = constBal
             modifyFile(accountsFile, constUser, userRec)
 
-            
-                
+        #Reset Values
+        emptyString = StringVar()
+        updateButton.configure(state = "disabled")
+        confirmButton.configure(state = "disabled")
+        curBalEntry.configure(textvariable = emptyString)
+        newBalEntry.configure(textvariable = emptyString)
+        timeEntry.configure(textvariable = emptyString)
+
+        #Success Popup
+        confirmPopup = Toplevel(window, bg = primaryColor)
+        confirmPopup.geometry("240x120")
+        popupFrame = Frame(confirmPopup, bg = primaryColor)
+        popupFrame.pack()
+        Label(popupFrame, text = "Success!", font = "Comfortaa 14", bg = primaryColor, fg = "#eee").pack(pady = 24)
+        Button(popupFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "OK", font = "Montserrat 8", relief = "groove", width = 3, command = confirmPopup.destroy).pack()
+
+
 
     frame = Frame(window, bg = primaryColor)
     frame.pack(anchor = "n", side = "top")
@@ -427,7 +454,7 @@ def createTicket(emp):
     navFrame.pack(fill = "x", before = frame, anchor = "n")
 
     #Back button
-    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), mainMenu(currentEmp)])
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), ticketManagement(currentEmp)])
     backButton.pack(anchor = "nw", side = "left")
 
     header = Label(frame, text = "Create Ticket", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
@@ -497,56 +524,7 @@ def createTicket(emp):
     confirmButton = Button(timeFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "Confirm", font = "Montserrat 8", width = 9, relief = "groove", state = "disabled", command = confirm)
     confirmButton.pack(side = "left")
 
-    #buttonFrame = Frame(frame)
-    #buttonFrame.pack()
-    #Button(buttonFrame).pack(side = "left")
-    #Button(buttonFrame).pack(side = "left")
-
-
-
     window.mainloop()
-
-#def createTicket():
-#    '''Create a new ticket'''
-#
-#    discountDict = {"regular": 1, "vip": 1.05}               #5% discount for VIP
-#
-#    with open("tickets.dat", "ab+") as ticketsFile, open("accounts_user.dat", "rb+") as accountsFile:
-#        user = input("Enter user: ")
-#        foundUser = findInFile(user, accountsFile)
-#        while not foundUser["found"]:                       #Finds user in account database
-#            user = input("User not found. Enter user: ")
-#            foundUser = findInFile(user, accountsFile)
-#
-#        if foundUser["rec"]["balance"] == 0:                #Checks if user has no balance
-#            print("User has no balance in their account.")   
-#            return         
-#        
-#        #Paid
-#        paid = float(input("Enter amount paid ($1/hr): "))
-#        while foundUser["rec"]["balance"] < paid:           #Checks if user has sufficient balance
-#            paid = float(input("Insufficient balance, please try again: ")) 
-#
-#        #Time
-#        timeBought = 0.01*(round(100*(paid * discountDict[foundUser["rec"]["type"]])))    #Multiplies by 100, then rounds, then divides by 100
-#
-#        #Discounts applied
-#        discount = discountDict[foundUser["rec"]["type"]]
-#
-#        #Time ticket was created
-#        timeCreated = time.ctime()
-#
-#        #Ticket record
-#        ticket = {"user": user, "paid": paid, "time bought": f"{timeBought} hours", "discount": f"{round((discount-1)*100)}%", "time created": timeCreated}
-#
-#        foundUser["rec"]["balance"] -= paid                 #Removed paid amount from user's balance
-#
-#        modifyFile(accountsFile, user, foundUser["rec"])    #Modifies user's information in file
-#
-#        pickle.dump(ticket, ticketsFile)
-#        displayFile(ticketsFile)
-#        displayFile(accountsFile)
-
 
 #Constants
 currentEmp = {}
