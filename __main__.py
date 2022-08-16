@@ -2,5 +2,5 @@
 
 from modules import tkmenus
 
-tkmenus.firstMenu() #{"empno": 0, "email": "test", "role": "admin"}
+tkmenus.accountManagement({"empno": 0, "email": "test", "role": "admin"}) #{"empno": 0, "email": "test", "role": "admin"}
 

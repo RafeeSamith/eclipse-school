@@ -207,7 +207,7 @@ def mainMenu(emp):
     header.pack(anchor="center", pady = (32, 0))
     
     #Buttons
-    accButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Account Management")
+    accButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Account Management", command = lambda: [outerFrame.destroy(), frame.destroy(), accountManagement(currentEmp)])
     accButton.pack(pady = (16, 2))
     ticketButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Ticket Management", command = lambda: [outerFrame.destroy(), frame.destroy(), ticketManagement(currentEmp)])
     ticketButton.pack(pady = 2)
@@ -257,93 +257,10 @@ def ticketManagement(emp):
     #Buttons
     createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Create Ticket", command = lambda:[navFrame.destroy(), frame.destroy(), createTicket()])
     createButton.pack(pady = (16, 2))
-    refundButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Refund Ticket")
-    refundButton.pack(pady = 2)
+
     displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Display Tickets", command = lambda:[navFrame.destroy(), frame.destroy(), displayTickets()])
     displayButton.pack(pady = 2)
 
-    window.mainloop()
-
-
-currentPage = 0
-
-#Display Tickets
-def displayTickets():
-
-    ticketList = []
-
-
-    with open("data/tickets.dat", "rb") as ticketsFile:
-        try:
-            while True:
-                rec = pickle.load(ticketsFile)
-                reclist = []
-                for v in rec.values():
-                    reclist.append(v)
-                ticketList.append(reclist)
-        except EOFError:
-            pass
-    
-    def pages(page):
-        global currentPage
-        totalPages = len(ticketList) // 12
-
-        if page == "next" and currentPage < totalPages:
-            currentPage += 1
-        elif page == "prev" and currentPage > 0:
-            currentPage -= 1
-        elif page == "refresh":
-            currentPage = 0
-
-        x = (currentPage*12)
-        for i in range(0, 12):
-            for j in range(0, 5):
-                try:
-                    ticketStr = StringVar()
-                    ticketStr.set(ticketList[i+x][j])
-                    entr = Entry(frame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 10", state = "readonly", textvariable = ticketStr)
-                    entr.grid(row = i+3, column = j)
-                except IndexError:
-                    entr.insert(0, "")
-
-    frame = Frame(window, bg = primaryColor)
-    frame.pack(anchor = "n", side = "top")
-    navFrame = Frame(frame, bg = primaryColor)
-    navFrame.grid(row = 0, column = 0, sticky = "nw")
-
-    #Back button
-    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), window.geometry("640x360"), ticketManagement(currentEmp)])
-    backButton.pack(anchor = "nw", side = "left")
-
-    #Header
-    header = Label(frame, text = "Tickets", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
-    header.grid(row = 1, column = 0, sticky = "nsew")
-    header.grid_configure(columnspan = 10)
-
-    #Ticket Headers
-    headerList = ["User", "Paid", "Time", "Discount", "Time Created"]
-
-    pageButtonFrame = Frame(frame, bg = "#f00")
-    pageButtonFrame.grid(row = 15, sticky = "e")
-    pageButtonFrame.grid_configure(columnspan = 100)
-
-    #Next Page button
-    nextPageButton = Button(pageButtonFrame, text = "▶", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("next")])
-    nextPageButton.pack(side = "right")
-
-    #Previous Page button
-    prevPageButton = Button(pageButtonFrame, text = "◀", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("prev")])
-    prevPageButton.pack(side = "right")
-
-
-    for i in range(5):
-        headerStr = StringVar()
-        headerStr.set(headerList[i])
-        Entry(frame, readonlybackground = primaryColor, fg = accentColor, font = "Montserrat 10 bold", state = "readonly", textvariable = headerStr).grid(row = 2, column = i)
-        
-    pages("refresh")
-
-    window.geometry("960x480")
     window.mainloop()
 
 #Create Ticket
@@ -446,8 +363,6 @@ def createTicket():
         Label(popupFrame, text = "Success!", font = "Comfortaa 14", bg = primaryColor, fg = "#eee").pack(pady = 24)
         Button(popupFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "OK", font = "Montserrat 8", relief = "groove", width = 3, command = confirmPopup.destroy).pack()
 
-
-
     frame = Frame(window, bg = primaryColor)
     frame.pack(anchor = "n", side = "top")
     navFrame = Frame(window, bg = primaryColor)
@@ -525,6 +440,215 @@ def createTicket():
     confirmButton.pack(side = "left")
 
     window.mainloop()
+
+currentPage = 0
+
+#Display Tickets
+def displayTickets():
+
+    ticketList = []
+    #Accounts Headers
+    headerList = []
+
+
+    with open("data/tickets.dat", "rb") as ticketsFile:
+        rec = pickle.load(ticketsFile)
+        for k in rec.keys():
+            headerList.append(k)
+            ticketsFile.seek(0)
+
+        try:
+            while True:
+                rec = pickle.load(ticketsFile)
+                reclist = []
+                for v in rec.values():
+                    reclist.append(v)
+                ticketList.append(reclist)
+        except EOFError:
+            pass
+
+    def pages(page):
+        global currentPage
+        totalPages = len(ticketList) // 12
+
+        if page == "next" and currentPage < totalPages:
+            currentPage += 1
+        elif page == "prev" and currentPage > 0:
+            currentPage -= 1
+        elif page == "refresh":
+            currentPage = 0
+
+        x = (currentPage*12)
+        for i in range(0, 12):
+            for j in range(0, len(headerList)):
+                try:
+                    ticketStr = StringVar()
+                    ticketStr.set(ticketList[i+x][j])
+                    entr = Entry(frame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 10", state = "readonly", textvariable = ticketStr)
+                    entr.grid(row = i+3, column = j)
+                except IndexError:
+                    entr.insert(0, "")
+
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(frame, bg = primaryColor)
+    navFrame.grid(row = 0, column = 0, sticky = "nw")
+
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), window.geometry("640x360"), ticketManagement(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "Tickets", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.grid(row = 1, column = 0, sticky = "nsew")
+    header.grid_configure(columnspan = 10)
+
+    #Ticket Headers
+    headerList = ["User", "Paid", "Time", "Discount", "Time Created"]
+
+    pageButtonFrame = Frame(frame, bg = "#f00")
+    pageButtonFrame.grid(row = 15, sticky = "e")
+    pageButtonFrame.grid_configure(columnspan = 100)
+
+    #Next Page button
+    nextPageButton = Button(pageButtonFrame, text = "▶", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("next")])
+    nextPageButton.pack(side = "right")
+
+    #Previous Page button
+    prevPageButton = Button(pageButtonFrame, text = "◀", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("prev")])
+    prevPageButton.pack(side = "right")
+
+
+    for i in range(len(headerList)):
+        headerStr = StringVar()
+        headerStr.set(headerList[i])
+        Entry(frame, readonlybackground = primaryColor, fg = accentColor, font = "Montserrat 10 bold", state = "readonly", textvariable = headerStr).grid(row = 2, column = i)
+        
+    pages("refresh")
+
+    window.geometry("960x480")
+    window.mainloop()
+
+#Account Management
+def accountManagement(emp):
+    global currentEmp
+    currentEmp = emp
+
+    role = currentEmp["role"]
+
+    #Create frames
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(window, bg = primaryColor)
+    navFrame.pack(fill = "x", before = frame, anchor = "n")
+
+    #Logged in user
+    email = currentEmp["email"]
+    loggedIn = Label(navFrame, text = f"Logged in as {email} ({role})", bg = primaryColor, fg = "#FF4C29", font = "Montserrat 8 bold")
+    loggedIn.pack(anchor = "ne", side = "right")
+    
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = "#FF4800", fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), mainMenu(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "Account Management", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.pack(anchor = "n")
+    
+    #Buttons
+    createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), createTicket()])
+    createButton.pack(pady = (16, 2))
+
+    displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), displayTickets()])
+    displayButton.pack(pady = 2)
+
+    window.mainloop()
+
+
+#Display Tickets
+def displayAccounts(type):
+
+    accountsList = []
+    #Accounts Headers
+    headerList = []
+
+    with open(f"data/accounts_{type}.dat", "rb") as ticketsFile:
+        rec = pickle.load(ticketsFile)
+        for k in rec.keys():
+            headerList.append(k)
+        ticketsFile.seek(0)
+
+        try:
+            while True:
+                rec = pickle.load(ticketsFile)
+                reclist = []
+                for v in rec.values():
+                    reclist.append(v)
+                accountsList.append(reclist)
+
+        except EOFError:
+            print(accountsList)      
+    
+    def pages(page):
+        global currentPage
+        totalPages = len(accountsList) // 12
+
+        if page == "next" and currentPage < totalPages:
+            currentPage += 1
+        elif page == "prev" and currentPage > 0:
+            currentPage -= 1
+        elif page == "refresh":
+            currentPage = 0
+
+        x = (currentPage*12)
+        for i in range(0, 12):
+            for j in range(0, len(headerList)):
+                try:
+                    ticketStr = StringVar()
+                    ticketStr.set(accountsList[i+x][j])
+                    entr = Entry(frame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 10", state = "readonly", textvariable = ticketStr)
+                    entr.grid(row = i+3, column = j)
+                except IndexError:
+                    entr.insert(0, "")
+
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(frame, bg = primaryColor)
+    navFrame.grid(row = 0, column = 0, sticky = "nw")
+
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), window.geometry("640x360"), ticketManagement(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "Accounts", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.grid(row = 1, column = 0, sticky = "nsew")
+    header.grid_configure(columnspan = 10)
+    
+
+    pageButtonFrame = Frame(frame, bg = "#f00")
+    pageButtonFrame.grid(row = 15, sticky = "e")
+    pageButtonFrame.grid_configure(columnspan = 100)
+
+    #Next Page button
+    nextPageButton = Button(pageButtonFrame, text = "▶", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("next")])
+    nextPageButton.pack(side = "right")
+
+    #Previous Page button
+    prevPageButton = Button(pageButtonFrame, text = "◀", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("prev")])
+    prevPageButton.pack(side = "right")
+
+
+    for i in range(len(headerList)):
+        headerStr = StringVar()
+        headerStr.set(headerList[i])
+        Entry(frame, readonlybackground = primaryColor, fg = accentColor, font = "Montserrat 10 bold", state = "readonly", textvariable = headerStr).grid(row = 2, column = i)
+        
+    pages("refresh")
+
+    window.geometry("960x480")
+    window.mainloop()
+
 
 #Constants
 currentEmp = {}
