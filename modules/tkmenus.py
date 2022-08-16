@@ -6,7 +6,6 @@ import time
 from tkinter.font import Font
 from modules.fileHandling import findInFile, displayFile, modifyFile
 from tkinter import *
-import modules.accountManagement as accountManagement
 import webbrowser
 
 
@@ -207,7 +206,7 @@ def mainMenu(emp):
     header.pack(anchor="center", pady = (32, 0))
     
     #Buttons
-    accButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Account Management", command = lambda: [outerFrame.destroy(), frame.destroy(), accountManagement(currentEmp)])
+    accButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Account Management", command = lambda: [outerFrame.destroy(), frame.destroy(), accountManagementSelect(currentEmp)])
     accButton.pack(pady = (16, 2))
     ticketButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Ticket Management", command = lambda: [outerFrame.destroy(), frame.destroy(), ticketManagement(currentEmp)])
     ticketButton.pack(pady = 2)
@@ -218,7 +217,6 @@ def mainMenu(emp):
 
     if roleHier.index(role) < 1:  #Below cashier
         ticketButton.configure(state = "disabled")
-    if roleHier.index(role) < 2:  #Below manager
         accButton.configure(state = "disabled")
 
     #Github
@@ -258,7 +256,7 @@ def ticketManagement(emp):
     createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Create Ticket", command = lambda:[navFrame.destroy(), frame.destroy(), createTicket()])
     createButton.pack(pady = (16, 2))
 
-    displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Display Tickets", command = lambda:[navFrame.destroy(), frame.destroy(), displayTickets()])
+    displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Display Tickets", command = lambda:[navFrame.destroy(), frame.destroy(), displayTickets("tickets")])
     displayButton.pack(pady = 2)
 
     window.mainloop()
@@ -444,32 +442,31 @@ def createTicket():
 currentPage = 0
 
 #Display Tickets
-def displayTickets():
+def displayFile(filename, header):
 
-    ticketList = []
+    recNestList = []
     #Accounts Headers
     headerList = []
 
-
-    with open("data/tickets.dat", "rb") as ticketsFile:
-        rec = pickle.load(ticketsFile)
+    with open(f"data/{filename}.dat", "rb") as fobj:
+        rec = pickle.load(fobj)
         for k in rec.keys():
             headerList.append(k)
-            ticketsFile.seek(0)
+            fobj.seek(0)
 
         try:
             while True:
-                rec = pickle.load(ticketsFile)
+                rec = pickle.load(fobj)
                 reclist = []
                 for v in rec.values():
                     reclist.append(v)
-                ticketList.append(reclist)
+                recNestList.append(reclist)
         except EOFError:
             pass
 
     def pages(page):
         global currentPage
-        totalPages = len(ticketList) // 12
+        totalPages = len(recNestList) // 12
 
         if page == "next" and currentPage < totalPages:
             currentPage += 1
@@ -483,9 +480,10 @@ def displayTickets():
             for j in range(0, len(headerList)):
                 try:
                     ticketStr = StringVar()
-                    ticketStr.set(ticketList[i+x][j])
+                    ticketStr.set(recNestList[i+x][j])
                     entr = Entry(frame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 10", state = "readonly", textvariable = ticketStr)
                     entr.grid(row = i+3, column = j)
+
                 except IndexError:
                     entr.insert(0, "")
 
@@ -499,12 +497,9 @@ def displayTickets():
     backButton.pack(anchor = "nw", side = "left")
 
     #Header
-    header = Label(frame, text = "Tickets", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header = Label(frame, text = header, font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
     header.grid(row = 1, column = 0, sticky = "nsew")
     header.grid_configure(columnspan = 10)
-
-    #Ticket Headers
-    headerList = ["User", "Paid", "Time", "Discount", "Time Created"]
 
     pageButtonFrame = Frame(frame, bg = "#f00")
     pageButtonFrame.grid(row = 15, sticky = "e")
@@ -518,7 +513,6 @@ def displayTickets():
     prevPageButton = Button(pageButtonFrame, text = "◀", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("prev")])
     prevPageButton.pack(side = "right")
 
-
     for i in range(len(headerList)):
         headerStr = StringVar()
         headerStr.set(headerList[i])
@@ -529,8 +523,8 @@ def displayTickets():
     window.geometry("960x480")
     window.mainloop()
 
-#Account Management
-def accountManagement(emp):
+#Account Management Selection
+def accountManagementSelect(emp):
     global currentEmp
     currentEmp = emp
 
@@ -556,98 +550,122 @@ def accountManagement(emp):
     header.pack(anchor = "n")
     
     #Buttons
-    createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), createTicket()])
-    createButton.pack(pady = (16, 2))
+    userButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), createTicket()])
+    userButton.pack(pady = (16, 2))
 
-    displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), displayTickets()])
-    displayButton.pack(pady = 2)
+    empButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), displayTickets("tickets")])
+    empButton.pack(pady = 2)
+
+    if roleHier.index(role) < 2:    #Manager
+        empButton.configure(state = "disabled")
 
     window.mainloop()
 
-
-#Display Tickets
-def displayAccounts(type):
-
-    accountsList = []
-    #Accounts Headers
-    headerList = []
-
-    with open(f"data/accounts_{type}.dat", "rb") as ticketsFile:
-        rec = pickle.load(ticketsFile)
-        for k in rec.keys():
-            headerList.append(k)
-        ticketsFile.seek(0)
-
-        try:
-            while True:
-                rec = pickle.load(ticketsFile)
-                reclist = []
-                for v in rec.values():
-                    reclist.append(v)
-                accountsList.append(reclist)
-
-        except EOFError:
-            print(accountsList)      
-    
-    def pages(page):
-        global currentPage
-        totalPages = len(accountsList) // 12
-
-        if page == "next" and currentPage < totalPages:
-            currentPage += 1
-        elif page == "prev" and currentPage > 0:
-            currentPage -= 1
-        elif page == "refresh":
-            currentPage = 0
-
-        x = (currentPage*12)
-        for i in range(0, 12):
-            for j in range(0, len(headerList)):
-                try:
-                    ticketStr = StringVar()
-                    ticketStr.set(accountsList[i+x][j])
-                    entr = Entry(frame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 10", state = "readonly", textvariable = ticketStr)
-                    entr.grid(row = i+3, column = j)
-                except IndexError:
-                    entr.insert(0, "")
-
+#Account Management
+def accountManagement(type):
+  
+    #Create frames
     frame = Frame(window, bg = primaryColor)
     frame.pack(anchor = "n", side = "top")
-    navFrame = Frame(frame, bg = primaryColor)
-    navFrame.grid(row = 0, column = 0, sticky = "nw")
-
+    navFrame = Frame(window, bg = primaryColor)
+    navFrame.pack(fill = "x", before = frame, anchor = "n")
+    
     #Back button
-    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), window.geometry("640x360"), ticketManagement(currentEmp)])
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = "#FF4800", fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), mainMenu(currentEmp)])
     backButton.pack(anchor = "nw", side = "left")
 
     #Header
-    header = Label(frame, text = "Accounts", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
-    header.grid(row = 1, column = 0, sticky = "nsew")
-    header.grid_configure(columnspan = 10)
+    header = Label(frame, text = "Account Management", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.pack(anchor = "n")
     
+    #Buttons
+    displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Display User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), displayFile(f"accounts_{type}", type.title())])
+    displayButton.pack(pady = (16, 2))
 
-    pageButtonFrame = Frame(frame, bg = "#f00")
-    pageButtonFrame.grid(row = 15, sticky = "e")
-    pageButtonFrame.grid_configure(columnspan = 100)
+    createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Display User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), displayFile(f"accounts_{type}", type.title())])
+    createButton.pack(pady = (16, 2))
 
-    #Next Page button
-    nextPageButton = Button(pageButtonFrame, text = "▶", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("next")])
-    nextPageButton.pack(side = "right")
-
-    #Previous Page button
-    prevPageButton = Button(pageButtonFrame, text = "◀", font = "Comfortaa 14", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = accentColor, fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[pages("prev")])
-    prevPageButton.pack(side = "right")
-
-
-    for i in range(len(headerList)):
-        headerStr = StringVar()
-        headerStr.set(headerList[i])
-        Entry(frame, readonlybackground = primaryColor, fg = accentColor, font = "Montserrat 10 bold", state = "readonly", textvariable = headerStr).grid(row = 2, column = i)
-        
-    pages("refresh")
-
-    window.geometry("960x480")
     window.mainloop()
+
+#Create User Account
+def createAccount_user():
+    
+    #Create frames
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(window, bg = primaryColor)
+    navFrame.pack(fill = "x", before = frame, anchor = "n")
+    
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = "#FF4800", fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), mainMenu(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "Account Management", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.pack(anchor = "n")
+    
+    #Username Frame
+    userFrame = Frame(frame, bg = primaryColor)
+    userFrame.pack()
+    #Username Label
+    userLabel = Label(userFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8", text = "Username:")
+    userLabel.pack(side = "left", pady=8)
+    #Username Entry
+    userEntry = Entry(userFrame, bg = secondaryColor, fg = "#eee", font = "Montserrat 8")
+    userEntry.pack(side="left", pady=8)
+    #Username Check Button
+    userCheckButton = Button(userFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "Check", font = "Montserrat 8", relief = "groove", width = 7)
+    userCheckButton.pack(side="left", pady=8)
+    #Username Check Label
+    userCheckLabel = Label(userFrame, bg = primaryColor, fg = "#eee", font = "Montserrat", text = "⭕")
+    userCheckLabel.pack(pady=8)
+
+    #Email Frame
+    emailFrame = Frame(frame, bg = primaryColor)
+    emailFrame.pack()
+    #Email Label
+    emailLabel = Label(emailFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8", text = "Email:")
+    emailLabel.pack(side = "left", pady=8)
+    #Email Entry
+    emailEntry = Entry(emailFrame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 8", state = "readonly")
+    emailEntry.pack(side="left", pady=8)
+    #Email Check Button
+    emailCheckButton = Button(emailFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "Check", font = "Montserrat 8", relief = "groove", width = 7, state = "disabled")
+    emailCheckButton.pack(side="left", pady=8)
+    #Email Check Label
+    emailCheckLabel = Label(emailFrame, bg = primaryColor, fg = "#eee", font = "Montserrat", text = "⭕")
+    emailCheckLabel.pack(pady=8)
+
+    #Type Frame
+    typeFrame = Frame(frame, bg = primaryColor)
+    typeFrame.pack()
+    #Type Selectors
+    typeVar = StringVar()
+
+    standardButton = Radiobutton(typeFrame, bg = primaryColor, activebackground = primaryColor, variable = typeVar, value = "standard")
+    standardButton.pack(side = "left")
+
+    standardLabel = Label(typeFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 9", text = "Standard")
+    standardLabel.pack(side = "left")
+    
+    vipButton = Radiobutton(typeFrame, bg = primaryColor, activebackground = primaryColor, variable = typeVar, value = "vip") 
+    vipButton.pack(side = "left")
+    
+    vipLabel = Label(typeFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 9", text = "VIP")
+    vipLabel.pack(side = "left")
+
+    #Bal Frame
+    balFrame = Frame(frame, bg = primaryColor)
+    balFrame.pack()
+    #Bal Label
+    bBalLabel = Label(balFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8", text = "Balance:")
+    bBalLabel.pack(side = "left", pady=8)
+    #Bal Entry
+    balEntry = Entry(balFrame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 8", state = "readonly")
+    balEntry.pack(side="left", pady=8)
+
+    window.mainloop()
+
 
 
 #Constants
