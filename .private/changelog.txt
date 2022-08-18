@@ -4,3 +4,6 @@
 
 +Added account display menu
 +Added account management pre-menu
+
+18-08-2022
++Sanitized empty fields
