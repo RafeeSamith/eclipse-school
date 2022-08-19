@@ -556,10 +556,10 @@ def accountManagementSelect(emp):
     header.pack(anchor = "n")
     
     #Buttons
-    userButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), accountManagement("user")])
+    userButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), accountManagement_user(currentEmp)])
     userButton.pack(pady = (16, 2))
 
-    empButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), accountManagement("emp")])
+    empButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), accountManagement_emp(currentEmp)])
     empButton.pack(pady = 2)
 
     if roleHier.index(role) < 2:    #Manager
@@ -567,8 +567,43 @@ def accountManagementSelect(emp):
 
     window.mainloop()
 
-#Account Management
-def accountManagement(type):
+#Account Management (User)
+def accountManagement_user(emp):
+    global currentEmp
+    currentEmp = emp
+  
+    #Create frames
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(window, bg = primaryColor)
+    navFrame.pack(fill = "x", before = frame, anchor = "n")
+    
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = "#FF4800", fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), mainMenu(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "Account Management", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.pack(anchor = "n")
+    
+        #Buttons
+    #Display Users Button
+    displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = f"Display User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), displayFile("accounts_user", header = "User Accounts")])
+    displayButton.pack(pady = (16, 2))
+    #Create User Button
+    createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = f"Create User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), createAccount_user(currentEmp)])
+    createButton.pack(pady = 2)
+    #Update User Button
+    updateButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = f"Create User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), updateAccount_user(currentEmp)])
+    updateButton.pack(pady = 2)
+    
+
+    window.mainloop()
+
+#Account Management (Employee)
+def accountManagement_emp(emp):
+    global currentEmp
+    currentEmp = emp
   
     #Create frames
     frame = Frame(window, bg = primaryColor)
@@ -585,16 +620,16 @@ def accountManagement(type):
     header.pack(anchor = "n")
     
     #Buttons
-    displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = f"Display {type.capitalize()} Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), displayFile(f"accounts_{type}", header = type.title())])
+    displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Display Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), displayFile("accounts_emp", header = "Employee Accounts")])
     displayButton.pack(pady = (16, 2))
 
-    createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = f"Create {type.capitalize()} Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), createAccount_user()])
+    createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Create Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), createAccount_emp(currentEmp)])
     createButton.pack(pady = 2)
 
     window.mainloop()
 
-#Create User Account
-def createAccount_user():
+#Create Account (User)
+def createAccount_user(emp):
     
     def userCheckPressed():
         user = userEntry.get()
@@ -695,9 +730,6 @@ def createAccount_user():
 
         returnState()
 
-
-
-
     #Create frames
     frame = Frame(window, bg = primaryColor)
     frame.pack(anchor = "n", side = "top")
@@ -715,7 +747,7 @@ def createAccount_user():
     #Error
     errorLabel = Label(frame, bg = primaryColor, fg = accentColor, font = "Montserrat 12", text = "")
     errorLabel.pack(pady = (8, 0))
-    
+
     #Username Frame
     userFrame = Frame(frame, bg = primaryColor)
     userFrame.pack()
@@ -731,7 +763,7 @@ def createAccount_user():
     #Username Check Label
     userCheckLabel = Label(userFrame, bg = primaryColor, fg = "#eee", font = "Montserrat", text = "⭕")
     userCheckLabel.pack(pady=8)
-
+    
     #Email Frame
     emailFrame = Frame(frame, bg = primaryColor)
     emailFrame.pack()
@@ -772,8 +804,8 @@ def createAccount_user():
     balFrame = Frame(frame, bg = primaryColor)
     balFrame.pack()
     #Bal Label
-    BalLabel = Label(balFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8", text = "Initial Balance:")
-    BalLabel.pack(side = "left", pady=8)
+    balLabel = Label(balFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8", text = "Initial Balance:")
+    balLabel.pack(side = "left", pady=8)
     #Bal Entry
     balEntry = Entry(balFrame, bg = secondaryColor, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 8", state = "readonly")
     balEntry.pack(side="left", pady=8)
@@ -784,7 +816,156 @@ def createAccount_user():
 
     window.mainloop()
 
+#Update Account (User)
+def updateAccount_user(emp):
+    global currentEmp
+    currentEmp = emp
+    
+    def userCheckPressed():
+        user = userEntry.get()
 
+        with open("data/accounts_user.dat", "rb") as accountsFile:
+            foundUser = findInFile(user, accountsFile)
+
+            def proceed():
+                userCheckLabel.configure(text = "✅", fg = "#0f0")
+                balEntry.configure(state = "normal")
+                errorLabel.configure(text = "")
+                confirmButton.configure(state = "normal")
+                
+            def block():
+                userCheckLabel.configure(text = "❎", fg = accentColor)
+                balEntry.configure(state = "readonly")
+                errorLabel.configure(text = "User Not Found")
+                confirmButton.configure(state = "disabled")
+
+            if not user:
+                errorLabel.configure(text = "Please fill out all fields")
+                return
+        
+            if not foundUser["found"]:
+                block()
+            else:
+                proceed()
+        
+        return user
+
+    def confirmButtonPressed():
+        user = userCheckPressed()
+        type = typeVar.get()
+        bal = float(balEntry.get())
+
+        def returnState():
+            userCheckLabel.configure(text = "⭕", fg = "#eee")
+            balEntry.configure(state = "readonly")
+            errorLabel.configure(text = "")
+            confirmButton.configure(state = "disabled")
+
+        if not type:
+            errorLabel.configure(text = "Please select a type")
+            return
+        if not bal:
+            errorLabel.configure(text = "Please enter balance")
+            return
+        
+        with open("data/accounts_user.dat", "rb+") as accountsFile:    
+        #    userRec = foundUser["rec"]
+        #    pos = foundUser["pos"]
+        #    
+        #    pickle.dump(userRec, accountsFile)
+
+            foundUser = findInFile(user, accountsFile)
+            userRec = foundUser["rec"]
+            print(userRec)
+
+            userRec["type"] = type
+            userRec["balance"] = bal
+
+            print(userRec)
+    #
+            modifyFile(accountsFile, query = user, newRec = userRec)
+
+        #Success Popup
+        confirmPopup = Toplevel(window, bg = primaryColor)
+        confirmPopup.geometry("240x120")
+        popupFrame = Frame(confirmPopup, bg = primaryColor)
+        popupFrame.pack()
+        Label(popupFrame, text = "Success!", font = "Comfortaa 14", bg = primaryColor, fg = "#eee").pack(pady = 24)
+        Button(popupFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "OK", font = "Montserrat 8", relief = "groove", width = 3, command = confirmPopup.destroy).pack()
+
+        returnState()
+        return
+
+    #Create frames
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(window, bg = primaryColor)
+    navFrame.pack(fill = "x", before = frame, anchor = "n")
+    
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = "#FF4800", fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), mainMenu(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "Update User Account", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.pack(anchor = "n")
+
+    #Error
+    errorLabel = Label(frame, bg = primaryColor, fg = accentColor, font = "Montserrat 12", text = "")
+    errorLabel.pack(pady = (8, 0))
+
+
+    #Username Frame
+    userFrame = Frame(frame, bg = primaryColor)
+    userFrame.pack()
+    #Username Label
+    userLabel = Label(userFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8", text = "Username:")
+    userLabel.pack(side = "left", pady=8)
+    #Username Entry
+    userEntry = Entry(userFrame, bg = secondaryColor, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 8")
+    userEntry.pack(side="left", pady=8)
+    #Username Check Button
+    userCheckButton = Button(userFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "Check", font = "Montserrat 8", relief = "groove", width = 7, command = userCheckPressed)
+    userCheckButton.pack(side="left", pady=8)
+    #Username Check Label
+    userCheckLabel = Label(userFrame, bg = primaryColor, fg = "#eee", font = "Montserrat", text = "⭕")
+    userCheckLabel.pack(pady=8)
+
+    #Type Frame
+    typeFrame = Frame(frame, bg = primaryColor)
+    typeFrame.pack()
+    #Type Selectors
+    typeVar = StringVar()
+
+    #Regular Type Radio Button
+    regularButton = Radiobutton(typeFrame, bg = primaryColor, activebackground = primaryColor, variable = typeVar, value = "regular")
+    regularButton.pack(side = "left")
+    #Regular Type Label
+    regularLabel = Label(typeFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 9", text = "Regular")
+    regularLabel.pack(side = "left")
+    
+    #VIP Type Radio Button
+    vipButton = Radiobutton(typeFrame, bg = primaryColor, activebackground = primaryColor, variable = typeVar, value = "vip") 
+    vipButton.pack(side = "left")
+    #VIP Type Label
+    vipLabel = Label(typeFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 9", text = "VIP")
+    vipLabel.pack(side = "left")
+
+    #Bal Frame
+    balFrame = Frame(frame, bg = primaryColor)
+    balFrame.pack()
+    #Bal Label
+    balLabel = Label(balFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8", text = "New Balance:")
+    balLabel.pack(side = "left", pady=8)
+    #Bal Entry
+    balEntry = Entry(balFrame, bg = secondaryColor, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 8", state = "readonly")
+    balEntry.pack(side="left", pady=8)
+
+    #Confirm Button
+    confirmButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", font = "Montserrat 8",  text = "Update Account", relief = "groove", state = "disabled", padx = 8, pady = 2, command = confirmButtonPressed)
+    confirmButton.pack(pady = 4)
+
+    window.mainloop()
 
 #Constants
 currentEmp = {}
