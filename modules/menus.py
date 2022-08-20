@@ -27,8 +27,8 @@ def firstMenu():
             
             if ch == 1:
                 login()
-            elif ch == 2:
-                createEmpAccount()
+            #elif ch == 2:
+                #createEmpAccount()
             else:
                 print("Invalid choice")
         except ValueError:
@@ -61,7 +61,7 @@ def login():
                 login()                 #Never thought I'd be using recursion, but alas
                 return                  #Returns in login come back here, so another return is needed to exit the recursion
             else:
-                createEmpAccount()
+                #createEmpAccount()
                 return
         else:
             password = input("Enter password (< to exit): ")
@@ -136,7 +136,7 @@ def mainMenu():
             print("Invalid choice")
 
 #About
-#def about():
+def about():
     print("""
     Eclipse
     
@@ -167,7 +167,7 @@ def manageAccountMenu_pre():
             manageAccountMenu_user()
 
 #Employee Account Management Menu
-#def manageAccountMenu_emp():
+def manageAccountMenu_emp():
     ch = 0
     while ch != 5:
         ch = int(input(
@@ -218,7 +218,7 @@ def manageAccountMenu_user():
            modules.accountManagement.deleteAccount("user")
 
 #Ticket Management Menu
-#def manageTickets():
+def manageTickets():
     if roleHier.index(currentEmp["role"]) < roleHier.index("cashier"):
         print("Access Denied. Only cashier or higher can access this section.")
         return
