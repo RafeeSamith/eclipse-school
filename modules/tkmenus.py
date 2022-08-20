@@ -104,6 +104,7 @@ def login():
 
 #Sign Up menu
 def signUp():
+    global currentEmp
 
     #Create frames
     outerFrame = Frame(window, bg = primaryColor)
@@ -144,13 +145,14 @@ def signUp():
             except KeyError:        #Empty file
                 pass
 
-            rec = {"empno": empno, "email": email, "password": password, "role": "guest"}
+            rec = {"empno": empno, "email": email, "password": password, "role": 0}
             pickle.dump(rec, accountsFile)
+            currentEmp = rec
 
             outerFrame.destroy()
             frame.destroy()
-            mainMenu()
 
+        mainMenu(currentEmp)
 
     #Back button
     backButton = Button(outerFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "flat", borderwidth = 0, command = lambda:[outerFrame.destroy(), frame.destroy(), firstMenu()])
@@ -187,7 +189,7 @@ def mainMenu(emp):
     global currentEmp
     currentEmp = emp
 
-    role = currentEmp["role"]
+    role = roleHier[currentEmp["role"]]
 
     def logout():
         outerFrame.destroy()
@@ -235,7 +237,7 @@ def ticketManagement(emp):
     currentEmp = emp
     #currentEmp = emp
 
-    role = currentEmp["role"]
+    role = roleHier[currentEmp["role"]]
 
     #Create frames
     frame = Frame(window, bg = primaryColor)
@@ -454,6 +456,8 @@ def displayFile(filename, header):
     #Accounts Headers
     headerList = []
 
+    types = {0: "Standard", 1: "VIP"}
+
     with open(f"data/{filename}.dat", "rb") as fobj:
         rec = pickle.load(fobj)
         for k in rec.keys():
@@ -464,8 +468,14 @@ def displayFile(filename, header):
             while True:
                 rec = pickle.load(fobj)
                 reclist = []
-                for v in rec.values():
-                    reclist.append(v)
+                for k, v in rec.items():
+                    if k != "type":
+                        reclist.append(v)
+                    else:
+                        try:
+                            reclist.append(types[v])
+                        except:
+                            pass
                 recNestList.append(reclist)
         except EOFError:
             pass
@@ -534,7 +544,7 @@ def accountManagementSelect(emp):
     global currentEmp
     currentEmp = emp
 
-    role = currentEmp["role"]
+    role = roleHier[currentEmp["role"]]
 
     #Create frames
     frame = Frame(window, bg = primaryColor)
@@ -697,8 +707,12 @@ def createAccount_user(emp):
     def confirmButtonPressed():
         user = userCheckPressed()
         email = emailCheckPressed()
-        type = typeVar.get()
-        bal = balEntry.get()
+        types = {"standard": 0, "vip": 1}
+        type = types[typeVar.get()]
+        try:
+            bal = float(balEntry.get())
+        except ValueError:
+            bal = 0.0
 
         def returnState():
             userCheckLabel.configure(text = "⭕", fg = "#eee")
@@ -709,11 +723,8 @@ def createAccount_user(emp):
             errorLabel.configure(text = "")
             confirmButton.configure(state = "disabled")
 
-        if not type:
+        if type not in (0, 1):
             errorLabel.configure(text = "Please select a type")
-            return
-        if not bal or not bal.isdigit():
-            errorLabel.configure(text = "Please enter initial balance")
             return
 
         with open("data/accounts_user.dat", "ab") as accountsFile:
@@ -826,10 +837,12 @@ def updateAccount_user(emp):
 
         with open("data/accounts_user.dat", "rb") as accountsFile:
             foundUser = findInFile(user, accountsFile)
+            curBal = foundUser["rec"]["balance"]
 
             def proceed():
                 userCheckLabel.configure(text = "✅", fg = "#0f0")
                 balEntry.configure(state = "normal")
+                curBalLabel.configure(text = f"Current: {curBal}")
                 errorLabel.configure(text = "")
                 confirmButton.configure(state = "normal")
                 
@@ -852,7 +865,9 @@ def updateAccount_user(emp):
 
     def confirmButtonPressed():
         user = userCheckPressed()
-        type = typeVar.get()
+
+        types = {"regular": 0, "vip": 1}
+        type = types[typeVar.get()]
         bal = float(balEntry.get())
 
         def returnState():
@@ -861,7 +876,7 @@ def updateAccount_user(emp):
             errorLabel.configure(text = "")
             confirmButton.configure(state = "disabled")
 
-        if not type:
+        if type not in (0, 1):
             errorLabel.configure(text = "Please select a type")
             return
         if not bal:
@@ -869,10 +884,6 @@ def updateAccount_user(emp):
             return
         
         with open("data/accounts_user.dat", "rb+") as accountsFile:    
-        #    userRec = foundUser["rec"]
-        #    pos = foundUser["pos"]
-        #    
-        #    pickle.dump(userRec, accountsFile)
 
             foundUser = findInFile(user, accountsFile)
             userRec = foundUser["rec"]
@@ -882,7 +893,7 @@ def updateAccount_user(emp):
             userRec["balance"] = bal
 
             print(userRec)
-    #
+    
             modifyFile(accountsFile, query = user, newRec = userRec)
 
         #Success Popup
@@ -960,6 +971,9 @@ def updateAccount_user(emp):
     #Bal Entry
     balEntry = Entry(balFrame, bg = secondaryColor, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 8", state = "readonly")
     balEntry.pack(side="left", pady=8)
+    #Current Balance Label
+    curBalLabel = Label(balFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8 italic", text = "Current:")
+    curBalLabel.pack(side = "left", pady=8)
 
     #Confirm Button
     confirmButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", font = "Montserrat 8",  text = "Update Account", relief = "groove", state = "disabled", padx = 8, pady = 2, command = confirmButtonPressed)
