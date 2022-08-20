@@ -457,6 +457,7 @@ def displayFile(filename, header):
     headerList = []
 
     types = {0: "Standard", 1: "VIP"}
+    roles = {0: "Guest", 1: "Cashier", 2: "Manager", 3: "Admin"}
 
     with open(f"data/{filename}.dat", "rb") as fobj:
         rec = pickle.load(fobj)
@@ -469,13 +470,12 @@ def displayFile(filename, header):
                 rec = pickle.load(fobj)
                 reclist = []
                 for k, v in rec.items():
-                    if k != "type":
-                        reclist.append(v)
+                    if k == "type":
+                        reclist.append(types[v])
+                    elif k == "role":
+                        reclist.append(roles[v])
                     else:
-                        try:
-                            reclist.append(types[v])
-                        except:
-                            pass
+                        reclist.append(v)
                 recNestList.append(reclist)
         except EOFError:
             pass
@@ -974,6 +974,156 @@ def updateAccount_user(emp):
     #Current Balance Label
     curBalLabel = Label(balFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8 italic", text = "Current:")
     curBalLabel.pack(side = "left", pady=8)
+
+    #Confirm Button
+    confirmButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", font = "Montserrat 8",  text = "Update Account", relief = "groove", state = "disabled", padx = 8, pady = 2, command = confirmButtonPressed)
+    confirmButton.pack(pady = 4)
+
+    window.mainloop()
+
+#Update Account (Employee)
+def updateAccount_emp(emp):
+    global currentEmp
+    currentEmp = emp
+    
+    def empCheckPressed():
+        empIn = empEntry.get()
+
+        if currentEmp["role"] < 3:
+            managerButton.configure(state = "disabled")
+            adminButton.configure(state = "disabled")
+
+        with open("data/accounts_emp.dat", "rb") as accountsFile:
+            foundEmp = findInFile(empIn, accountsFile)
+
+            if foundEmp["rec"]["role"] >= currentEmp["role"]:
+                errorLabel.configure(text = "Insufficient Permission")
+                return
+
+            def proceed():
+                empCheckLabel.configure(text = "✅", fg = "#0f0")
+                errorLabel.configure(text = "")
+                confirmButton.configure(state = "normal")
+                
+            def block():
+                empCheckLabel.configure(text = "❎", fg = accentColor)
+                errorLabel.configure(text = "Employee Not Found")
+                confirmButton.configure(state = "disabled")
+
+            if not empIn:
+                errorLabel.configure(text = "Please fill out all fields")
+                return
+        
+            if not foundEmp["found"]:
+                block()
+            else:
+                proceed()
+        
+        return empIn
+
+    def confirmButtonPressed():
+        emp = empCheckPressed()
+
+        roles = {"guest": 0, "cashier": 1, "manager": 2, "admin": 3}
+        role = roles[roleVar.get()]
+
+        def returnState():
+            empCheckLabel.configure(text = "⭕", fg = "#eee")
+            errorLabel.configure(text = "")
+            confirmButton.configure(state = "disabled")
+
+        if role not in (0, 1):
+            errorLabel.configure(text = "Please select a type")
+            return
+        
+        with open("data/accounts_emp.dat", "rb+") as accountsFile:    
+
+            foundEmp = findInFile(emp, accountsFile)
+            empRec = foundEmp["rec"]
+
+            empRec["role"] = role
+    
+            modifyFile(accountsFile, query = emp, newRec = empRec)
+
+        #Success Popup
+        confirmPopup = Toplevel(window, bg = primaryColor)
+        confirmPopup.geometry("240x120")
+        popupFrame = Frame(confirmPopup, bg = primaryColor)
+        popupFrame.pack()
+        Label(popupFrame, text = "Success!", font = "Comfortaa 14", bg = primaryColor, fg = "#eee").pack(pady = 24)
+        Button(popupFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "OK", font = "Montserrat 8", relief = "groove", width = 3, command = confirmPopup.destroy).pack()
+
+        returnState()
+        return
+
+    #Create frames
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(window, bg = primaryColor)
+    navFrame.pack(fill = "x", before = frame, anchor = "n")
+    
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = "#FF4800", fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), mainMenu(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "Update Employee Account", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.pack(anchor = "n")
+
+    #Error
+    errorLabel = Label(frame, bg = primaryColor, fg = accentColor, font = "Montserrat 12", text = "")
+    errorLabel.pack(pady = (8, 0))
+
+
+    #Employee Frame
+    empFrame = Frame(frame, bg = primaryColor)
+    empFrame.pack()
+    #Employee Label
+    empLabel = Label(empFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8", text = "Employee:")
+    empLabel.pack(side = "left", pady=8)
+    #Employee Entry
+    empEntry = Entry(empFrame, bg = secondaryColor, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 8")
+    empEntry.pack(side="left", pady=8)
+    #Employee Check Button
+    empCheckButton = Button(empFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "Check", font = "Montserrat 8", relief = "groove", width = 7, command = empCheckPressed)
+    empCheckButton.pack(side="left", pady=8)
+    #Employee Check Label
+    empCheckLabel = Label(empFrame, bg = primaryColor, fg = "#eee", font = "Montserrat", text = "⭕")
+    empCheckLabel.pack(pady=8)
+
+    #Role Frame
+    roleFrame = Frame(frame, bg = primaryColor)
+    roleFrame.pack()
+    #Role Selectors
+    roleVar = StringVar()
+
+    #Guest Type Radio Button
+    guestButton = Radiobutton(roleFrame, bg = primaryColor, activebackground = primaryColor, variable = roleVar, value = "guest")
+    guestButton.pack(side = "left")
+    #Guest Type Label
+    guestLabel = Label(roleFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 9", text = "Guest")
+    guestLabel.pack(side = "left")
+    
+    #Cashier Type Radio Button
+    cashierButton = Radiobutton(roleFrame, bg = primaryColor, activebackground = primaryColor, variable = roleVar, value = "cashier") 
+    cashierButton.pack(side = "left")
+    #Cashier Type Label
+    cashierLabel = Label(roleFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 9", text = "Cashier")
+    cashierLabel.pack(side = "left")
+
+    #Manager Type Radio Button
+    managerButton = Radiobutton(roleFrame, bg = primaryColor, activebackground = primaryColor, variable = roleVar, value = "manager")
+    managerButton.pack(side = "left")
+    #Manager Type Label
+    managerLabel = Label(roleFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 9", text = "Manager")
+    managerLabel.pack(side = "left")
+    
+    #Admin Type Radio Button
+    adminButton = Radiobutton(roleFrame, bg = primaryColor, activebackground = primaryColor, variable = roleVar, value = "admin") 
+    adminButton.pack(side = "left")
+    #Admin Type Label
+    adminLabel = Label(roleFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 9", text = "Admin")
+    adminLabel.pack(side = "left")
 
     #Confirm Button
     confirmButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", font = "Montserrat 8",  text = "Update Account", relief = "groove", state = "disabled", padx = 8, pady = 2, command = confirmButtonPressed)

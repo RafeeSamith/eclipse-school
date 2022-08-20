@@ -8,3 +8,6 @@
 18-08-2022
 +Sanitized empty fields
 +Implemented account creation menu
+
+21-08-2022
++Fixed account structures in binary files
