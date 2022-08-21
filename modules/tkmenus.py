@@ -4,7 +4,7 @@
 import pickle
 import time
 from tkinter.font import Font
-from modules.fileHandling import findInFile, displayFile, modifyFile
+from modules.fileHandling import findInFile, displayFile, modifyFile, deleteInFile
 from tkinter import *
 import webbrowser
 
@@ -633,13 +633,15 @@ def accountManagement_emp(emp):
     displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Display Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), displayFile("accounts_emp", header = "Employee Accounts")])
     displayButton.pack(pady = (16, 2))
 
-    createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Create Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), createAccount_emp(currentEmp)])
-    createButton.pack(pady = 2)
+    updateButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Update Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), updateAccount_emp(currentEmp)])
+    updateButton.pack(pady = 2)
 
     window.mainloop()
 
 #Create Account (User)
 def createAccount_user(emp):
+    global currentEmp
+    currentEmp = emp
     
     def userCheckPressed():
         user = userEntry.get()
@@ -1131,6 +1133,127 @@ def updateAccount_emp(emp):
 
     window.mainloop()
 
+#Delete Account (User)
+def deleteAccount_user(emp):
+    global currentEmp
+    currentEmp = emp
+    
+    def userCheckPressed():
+        user = userEntry.get()
+
+        types = {0: "Regular", 1: "VIP"}
+
+        with open("data/accounts_user.dat", "rb") as accountsFile:
+            foundUser = findInFile(user, accountsFile)
+            email = foundUser["rec"]["email"]
+            accType = types[foundUser["rec"]["type"]]
+            bal = foundUser["rec"]["balance"]
+
+            def proceed():
+                userCheckLabel.configure(text = "✅", fg = "#0f0")
+                errorLabel.configure(text = "")
+                confirmButton.configure(state = "normal")
+                emailLabel.configure(text = f"Email: {email}")
+                typeLabel.configure(text = f"Type: {accType}")
+                balLabel.configure(text = f"Balance: {bal}")
+                
+            def block():
+                userCheckLabel.configure(text = "❎", fg = accentColor)
+                errorLabel.configure(text = "User Not Found")
+                confirmButton.configure(state = "disabled")
+                emailLabel.configure(text = "")
+                typeLabel.configure(text = "")
+                balLabel.configure(text = "")
+
+            if not user:
+                errorLabel.configure(text = "Please fill out all fields")
+                return
+        
+            if not foundUser["found"]:
+                block()
+            else:
+                proceed()
+        
+        return user
+
+    def confirmButtonPressed():
+        user = userCheckPressed()
+
+        types = {"regular": 0, "vip": 1}
+
+        def returnState():
+            userCheckLabel.configure(text = "⭕", fg = "#eee")
+            errorLabel.configure(text = "")
+            confirmButton.configure(state = "disabled")
+            emailLabel.configure(text = "")
+            typeLabel.configure(text = "")
+            balLabel.configure(text = "")
+
+
+        deleteInFile("data/accounts_user.dat", user)
+
+
+        #Success Popup
+        confirmPopup = Toplevel(window, bg = primaryColor)
+        confirmPopup.geometry("240x120")
+        popupFrame = Frame(confirmPopup, bg = primaryColor)
+        popupFrame.pack()
+        Label(popupFrame, text = "Success!", font = "Comfortaa 14", bg = primaryColor, fg = "#eee").pack(pady = 24)
+        Button(popupFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "OK", font = "Montserrat 8", relief = "groove", width = 3, command = confirmPopup.destroy).pack()
+
+        returnState()
+        return
+
+    #Create frames
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(window, bg = primaryColor)
+    navFrame.pack(fill = "x", before = frame, anchor = "n")
+    
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = "#FF4800", fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), mainMenu(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "Update User Account", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.pack(anchor = "n")
+
+    #Error
+    errorLabel = Label(frame, bg = primaryColor, fg = accentColor, font = "Montserrat 12", text = "")
+    errorLabel.pack(pady = (8, 0))
+
+    #Username Frame
+    userFrame = Frame(frame, bg = primaryColor)
+    userFrame.pack()
+    #Username Label
+    userLabel = Label(userFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8", text = "Username:")
+    userLabel.pack(side = "left", pady=8)
+    #Username Entry
+    userEntry = Entry(userFrame, bg = secondaryColor, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 8")
+    userEntry.pack(side="left", pady=8)
+    #Username Check Button
+    userCheckButton = Button(userFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "Check", font = "Montserrat 8", relief = "groove", width = 7, command = userCheckPressed)
+    userCheckButton.pack(side="left", pady=8)
+    #Username Check Label
+    userCheckLabel = Label(userFrame, bg = primaryColor, fg = "#eee", font = "Montserrat", text = "⭕")
+    userCheckLabel.pack(pady=8)
+
+    #Email Label
+    emailLabel = Label(frame, bg = primaryColor, fg = "#eee", font = "Montserrat 10")
+    emailLabel.pack(pady = 4)
+    #Type Label
+    typeLabel = Label(frame, bg = primaryColor, fg = "#eee", font = "Montserrat 10")
+    typeLabel.pack(pady = 4)
+    #Balance Label
+    balLabel = Label(frame, bg = primaryColor, fg = "#eee", font = "Montserrat 10")
+    balLabel.pack(pady = 4)
+
+    #Confirm Button
+    confirmButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", font = "Montserrat 8",  text = "Delete Account", relief = "groove", state = "disabled", padx = 8, pady = 2, command = confirmButtonPressed)
+    confirmButton.pack(pady = 4)
+
+    window.mainloop()
+
 #Constants
 currentEmp = {}
 roleHier = ("guest", "cashier", "manager", "admin")    #Role hierarchy
@@ -1143,5 +1266,5 @@ window = Tk()
 window.configure(bg = primaryColor, padx = 8, pady = 8)
 window.geometry("640x360")
 window.title("Eclipse")
-#
+#Github Image Object
 github = PhotoImage(file = r"resources/github.png")

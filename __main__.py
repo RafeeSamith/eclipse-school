@@ -4,7 +4,6 @@ from modules import tkmenus
 from modules import fileHandling
 
 
-#{"empno": 0, "email": "test", "role": "admin"}
-tkmenus.displayFile("accounts_emp", "jdkhjaslfl")
-#tkmenus.updateAccount_emp({"empno": 0, "email": "test", "role": 3})
 #tkmenus.firstMenu()
+#tkmenus.deleteAccount_user({"empno": 0, "email": "test", "password": "a", "role": 3})
+tkmenus.displayFile("accounts_user", "tesa")

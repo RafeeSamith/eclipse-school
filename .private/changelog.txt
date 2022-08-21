@@ -11,3 +11,4 @@
 
 21-08-2022
 +Fixed account structures in binary files
++Implemented employee account editing
