@@ -12,3 +12,12 @@
 21-08-2022
 +Fixed account structures in binary files
 +Implemented employee account editing
+
+22-08-2022
++Added user account delete menu
+
+23-08-2022
++Made sure an employee can't edit or delete their own account
++Fixed files being left open due to inner function call
++Added employee account delete menu
++Fixed displayFile entries from previous page showing on empty spots on the next page

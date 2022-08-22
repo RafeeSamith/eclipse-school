@@ -70,6 +70,7 @@ def login():
 
                 outerFrame.destroy()
                 frame.destroy()
+                accountsFile.close()
                 mainMenu(currentEmp)
 
     #Back button
@@ -151,6 +152,7 @@ def signUp():
 
             outerFrame.destroy()
             frame.destroy()
+            accountsFile.close()
 
         mainMenu(currentEmp)
 
@@ -271,7 +273,7 @@ def ticketManagement(emp):
 def createTicket():
 
     accType = "regular"
-    discountDict = {"regular": 1, "vip": 1.05}               #5% discount for VIP
+    discountDict = (1, 1.05)      #5% discount for VIP
 
     constUser = ""
     constBal = 0.0
@@ -339,7 +341,7 @@ def createTicket():
         global constBal
         global constTime
         global constUser
-        discountDict = {"regular": 1, "vip": 1.05}
+        discountDict = (1, 1.05)
         discount = discountDict[accType]
         with open("data/accounts_user.dat", "rb+") as accountsFile, open("data/tickets.dat", "ab") as ticketsFile:
             #Time ticket was created
@@ -456,8 +458,8 @@ def displayFile(filename, header):
     #Accounts Headers
     headerList = []
 
-    types = {0: "Standard", 1: "VIP"}
-    roles = {0: "Guest", 1: "Cashier", 2: "Manager", 3: "Admin"}
+    types = ("Regular", "VIP")
+    roles = ("Guest", "Cashier", "Manager", "Admin")
 
     with open(f"data/{filename}.dat", "rb") as fobj:
         rec = pickle.load(fobj)
@@ -470,10 +472,12 @@ def displayFile(filename, header):
                 rec = pickle.load(fobj)
                 reclist = []
                 for k, v in rec.items():
-                    if k == "type":
+                    if k == "type":                 #Special condition for user files with type header
                         reclist.append(types[v])
-                    elif k == "role":
+                    elif k == "role":               #Special condition for employee files with role header
                         reclist.append(roles[v])
+                    elif k == "password":           #Special condition for any password header
+                        reclist.append("•"*len(v))
                     else:
                         reclist.append(v)
                 recNestList.append(reclist)
@@ -499,9 +503,12 @@ def displayFile(filename, header):
                     ticketStr.set(recNestList[i+x][j])
                     entry = Entry(frame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 10", state = "readonly", textvariable = ticketStr)
                     entry.grid(row = i+3, column = j)
-
+                    
                 except IndexError:
-                    entry.insert(0, "")
+                    emptyStr = StringVar()
+                    emptyStr.set("")
+                    entry = Entry(frame, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 10", state = "readonly", textvariable = emptyStr)
+                    entry.grid(row = i+3, column = j)
 
     frame = Frame(window, bg = primaryColor)
     frame.pack(anchor = "n", side = "top")
@@ -604,9 +611,11 @@ def accountManagement_user(emp):
     createButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = f"Create User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), createAccount_user(currentEmp)])
     createButton.pack(pady = 2)
     #Update User Button
-    updateButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = f"Create User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), updateAccount_user(currentEmp)])
+    updateButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = f"Update User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), updateAccount_user(currentEmp)])
     updateButton.pack(pady = 2)
-    
+    #Delete User Button
+    deleteButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = f"Delete User Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), deleteAccount_user(currentEmp)])
+    deleteButton.pack(pady = 2)
 
     window.mainloop()
 
@@ -629,12 +638,16 @@ def accountManagement_emp(emp):
     header = Label(frame, text = "Account Management", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
     header.pack(anchor = "n")
     
-    #Buttons
+        #Buttons
+    #Display Button
     displayButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Display Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), displayFile("accounts_emp", header = "Employee Accounts")])
     displayButton.pack(pady = (16, 2))
-
+    #Update Button
     updateButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Update Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), updateAccount_emp(currentEmp)])
     updateButton.pack(pady = 2)
+    #Delete Button
+    deleteButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Delete Employee Accounts", command = lambda:[navFrame.destroy(), frame.destroy(), deleteAccount_emp(currentEmp)])
+    deleteButton.pack(pady = 2)
 
     window.mainloop()
 
@@ -709,7 +722,7 @@ def createAccount_user(emp):
     def confirmButtonPressed():
         user = userCheckPressed()
         email = emailCheckPressed()
-        types = {"standard": 0, "vip": 1}
+        types = ("regular", "vip")
         type = types[typeVar.get()]
         try:
             bal = float(balEntry.get())
@@ -868,7 +881,7 @@ def updateAccount_user(emp):
     def confirmButtonPressed():
         user = userCheckPressed()
 
-        types = {"regular": 0, "vip": 1}
+        types = ("regular", "vip")
         type = types[typeVar.get()]
         bal = float(balEntry.get())
 
@@ -1001,6 +1014,10 @@ def updateAccount_emp(emp):
             if foundEmp["rec"]["role"] >= currentEmp["role"]:
                 errorLabel.configure(text = "Insufficient Permission")
                 return
+            
+            if foundEmp["rec"]["empno"] == currentEmp["empno"]:
+                errorLabel.configure(text = "Cannot edit own account")
+                return
 
             def proceed():
                 empCheckLabel.configure(text = "✅", fg = "#0f0")
@@ -1026,7 +1043,7 @@ def updateAccount_emp(emp):
     def confirmButtonPressed():
         emp = empCheckPressed()
 
-        roles = {"guest": 0, "cashier": 1, "manager": 2, "admin": 3}
+        roles = ("guest", "cashier", "manager", "admin")
         role = roles[roleVar.get()]
 
         def returnState():
@@ -1141,7 +1158,7 @@ def deleteAccount_user(emp):
     def userCheckPressed():
         user = userEntry.get()
 
-        types = {0: "Regular", 1: "VIP"}
+        types = ("Regular", "VIP")
 
         with open("data/accounts_user.dat", "rb") as accountsFile:
             foundUser = findInFile(user, accountsFile)
@@ -1179,7 +1196,7 @@ def deleteAccount_user(emp):
     def confirmButtonPressed():
         user = userCheckPressed()
 
-        types = {"regular": 0, "vip": 1}
+        types = ("regular", "vip")
 
         def returnState():
             userCheckLabel.configure(text = "⭕", fg = "#eee")
@@ -1215,7 +1232,7 @@ def deleteAccount_user(emp):
     backButton.pack(anchor = "nw", side = "left")
 
     #Header
-    header = Label(frame, text = "Update User Account", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header = Label(frame, text = "Delete User Account", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
     header.pack(anchor = "n")
 
     #Error
@@ -1247,6 +1264,135 @@ def deleteAccount_user(emp):
     #Balance Label
     balLabel = Label(frame, bg = primaryColor, fg = "#eee", font = "Montserrat 10")
     balLabel.pack(pady = 4)
+
+    #Confirm Button
+    confirmButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", font = "Montserrat 8",  text = "Delete Account", relief = "groove", state = "disabled", padx = 8, pady = 2, command = confirmButtonPressed)
+    confirmButton.pack(pady = 4)
+
+    window.mainloop()
+
+#Delete Account (Employee)
+def deleteAccount_emp(emp):
+    global currentEmp
+    currentEmp = emp
+    
+    def empCheckPressed():
+        emp = empEntry.get()
+
+        roles = ("Guest", "Cashier", "Manager", "Admin")
+
+        with open("data/accounts_emp.dat", "rb") as accountsFile:
+            foundEmp = findInFile(emp, accountsFile)
+
+            if foundEmp["rec"]["role"] > currentEmp["role"]:
+                errorLabel.configure(text = "Insufficient Permissions")
+                return
+            
+            if foundEmp["rec"]["empno"] == currentEmp["empno"]:
+                errorLabel.configure(text = "Cannot delete own account")
+                return
+
+            email = foundEmp["rec"]["email"]
+            role = roles[foundEmp["rec"]["role"]]
+            passwordPlain = foundEmp["rec"]["password"]
+            password = "•"*len(passwordPlain)
+
+            def proceed():
+                empCheckLabel.configure(text = "✅", fg = "#0f0")
+                errorLabel.configure(text = "")
+                confirmButton.configure(state = "normal")
+                emailLabel.configure(text = f"Email: {email}")
+                passLabel.configure(text = f"Password: {password}")
+                roleLabel.configure(text = f"Role: {role}")
+                
+            def block():
+                empCheckLabel.configure(text = "❎", fg = accentColor)
+                errorLabel.configure(text = "Employee Not Found")
+                confirmButton.configure(state = "disabled")
+                emailLabel.configure(text = "")
+                passLabel.configure(text = "")
+                roleLabel.configure(text = "")
+
+            if not emp:
+                errorLabel.configure(text = "Please fill out all fields")
+                return
+        
+            if not foundEmp["found"]:
+                block()
+            else:
+                proceed()
+        
+        return emp
+
+    def confirmButtonPressed():
+        
+        emp = empCheckPressed()
+
+        def returnState():
+            empCheckLabel.configure(text = "⭕", fg = "#eee")
+            errorLabel.configure(text = "")
+            confirmButton.configure(state = "disabled")
+            emailLabel.configure(text = "")
+            passLabel.configure(text = "")
+            roleLabel.configure(text = "")
+
+        
+        deleteInFile("data/accounts_emp.dat", emp)
+
+        #Success Popup
+        confirmPopup = Toplevel(window, bg = primaryColor)
+        confirmPopup.geometry("240x120")
+        popupFrame = Frame(confirmPopup, bg = primaryColor)
+        popupFrame.pack()
+        Label(popupFrame, text = "Success!", font = "Comfortaa 14", bg = primaryColor, fg = "#eee").pack(pady = 24)
+        Button(popupFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "OK", font = "Montserrat 8", relief = "groove", width = 3, command = confirmPopup.destroy).pack()
+
+        returnState()
+        return
+
+    #Create frames
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(window, bg = primaryColor)
+    navFrame.pack(fill = "x", before = frame, anchor = "n")
+    
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = "#FF4800", fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), mainMenu(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "Delete Employee Account", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.pack(anchor = "n")
+
+    #Error
+    errorLabel = Label(frame, bg = primaryColor, fg = accentColor, font = "Montserrat 12", text = "")
+    errorLabel.pack(pady = (8, 0))
+
+    #Employee Frame
+    empFrame = Frame(frame, bg = primaryColor)
+    empFrame.pack()
+    #Employee Label
+    empLabel = Label(empFrame, bg = primaryColor, fg = "#eee", font = "Montserrat 8", text = "Employee:")
+    empLabel.pack(side = "left", pady=8)
+    #Employee Entry
+    empEntry = Entry(empFrame, bg = secondaryColor, readonlybackground = secondaryColor, fg = "#eee", font = "Montserrat 8")
+    empEntry.pack(side="left", pady=8)
+    #Employee Check Button
+    empCheckButton = Button(empFrame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", text = "Check", font = "Montserrat 8", relief = "groove", width = 7, command = empCheckPressed)
+    empCheckButton.pack(side="left", pady=8)
+    #Employee Check Label
+    empCheckLabel = Label(empFrame, bg = primaryColor, fg = "#eee", font = "Montserrat", text = "⭕")
+    empCheckLabel.pack(pady=8)
+
+    #Email Label
+    emailLabel = Label(frame, bg = primaryColor, fg = "#eee", font = "Montserrat 10")
+    emailLabel.pack(pady = 4)
+    #Password Label
+    passLabel = Label(frame, bg = primaryColor, fg = "#eee", font = "Montserrat 10")
+    passLabel.pack(pady = 4)
+    #Role Label
+    roleLabel = Label(frame, bg = primaryColor, fg = "#eee", font = "Montserrat 10")
+    roleLabel.pack(pady = 4)
 
     #Confirm Button
     confirmButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", font = "Montserrat 8",  text = "Delete Account", relief = "groove", state = "disabled", padx = 8, pady = 2, command = confirmButtonPressed)
