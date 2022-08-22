@@ -8,7 +8,6 @@ from modules.fileHandling import findInFile, displayFile, modifyFile, deleteInFi
 from tkinter import *
 import webbrowser
 
-
 #Functions
 def firstMenu():
     '''Initial Log in/Sign up menu'''
@@ -218,7 +217,7 @@ def mainMenu(emp):
     accButton.pack(pady = (16, 2))
     ticketButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Ticket Management", command = lambda: [outerFrame.destroy(), frame.destroy(), ticketManagement(currentEmp)])
     ticketButton.pack(pady = 2)
-    aboutButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "About")
+    aboutButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "About", command = about)
     aboutButton.pack(pady = 2)
     logoutButton = Button(frame, bg = primaryColor, activebackground = secondaryColor, fg = "#eee", activeforeground = "#FF4800", relief = "groove", width = 30, font = "Montserrat 10", pady = 4, text = "Log Out", command = logout)
     logoutButton.pack(pady = 2)
@@ -232,6 +231,42 @@ def mainMenu(emp):
     githubButton.pack(anchor = "se", side = "bottom")
 
     window.mainloop()
+
+#About
+def about(emp):
+    global currentEmp
+    currentEmp = emp
+
+    #Create frames
+    frame = Frame(window, bg = primaryColor)
+    frame.pack(anchor = "n", side = "top")
+    navFrame = Frame(window, bg = primaryColor)
+    navFrame.pack(fill = "x", before = frame, anchor = "n")
+    
+    #Back button
+    backButton = Button(navFrame, text = "◀", font = "Comfortaa 18", height = 0, width = 3, bg = primaryColor, activebackground = secondaryColor, activeforeground = "#FF4800", fg = "#eee", relief = "flat", borderwidth = 0, command = lambda:[navFrame.destroy(), frame.destroy(), gitFrame.destroy(), window.geometry("640x360"), mainMenu(currentEmp)])
+    backButton.pack(anchor = "nw", side = "left")
+
+    #Header
+    header = Label(frame, text = "About", font = "Comfortaa 24", bg = primaryColor, fg = "#eee")
+    header.pack(anchor = "n")
+
+    #Github Frame
+    gitFrame = Frame(window, bg = primaryColor)
+    gitFrame.pack(fill = "x", anchor = "s")
+    #Github
+    githubButton = Button(gitFrame, image = github, bg = primaryColor, relief = "flat", command = lambda:webbrowser.open_new_tab("https://github.com/rafeesamith"))
+    githubButton.pack(anchor = "se", side = "bottom", pady = (24, 0), padx = 8)
+
+    #Paragraph
+    p = Label(frame, text = "Welcome to Eclipse, my little school project that I've worked on for a while based on a management system of a 'cybercafe': Where people pay to use computers to access the internet or play games. The name Eclipse pays tribute to a cybercafe that I would go to with my friends and a place I made a lot of memories in, which had closed down recently at the time of making this program.\n\n"
+                            "This program features employee accounts with various levels of privilege, user accounts (with a bonus for VIP customers!), and a full-fletched ticketing system to keep track of all the transactions and the time they were processed.\n\n"
+                            "Make sure the fonts Comfortaa and Montserrat are installed, otherwise the program may not look right. The .ttf files are included in the repo and they are also available on Google Fonts.", font = "Montserrat 12", bg = primaryColor, fg = "#eee", wraplength = "512", justify = "left")
+    p.pack()
+    
+    window.geometry("640x580")
+    window.mainloop()
+
 
 #Ticket Management
 def ticketManagement(emp):
