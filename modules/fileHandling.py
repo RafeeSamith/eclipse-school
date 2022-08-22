@@ -2,6 +2,7 @@
 '''Library that holds some essential file handling functions to make the program efficient'''
 
 import pickle
+import os
 
 #Functions
 
@@ -44,3 +45,22 @@ def modifyFile(fobj, query, newRec):
         pickle.dump(newRec, fobj)
     else:
         print("Query not found")
+
+#Delete Record In File
+def deleteInFile(path, query):
+    '''Deletes a record in a file'''
+
+    with open(path, "rb") as oldFile, open("data/temp.dat", "wb") as newFile:
+        foundRec = findInFile(query, oldFile)
+        if foundRec["found"]:
+            oldFile.seek(0)
+            try:
+                while True:
+                    rec = pickle.load(oldFile)
+                    if rec != foundRec["rec"]:
+                        pickle.dump(rec, newFile)
+            except EOFError:
+                oldFile.close()
+                newFile.close()
+                os.remove(path)
+                os.rename("data/temp.dat", path)
