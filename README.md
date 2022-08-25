@@ -1,3 +1,4 @@
+
 # eclipse-school
 
 Welcome to **Eclipse**, my little school project that I've worked on for a while based on a management system of a 'cybercafe': Where people pay to use computers to access the internet or play games. The name Eclipse pays tribute to a cybercafe that I would go to with my friends and a place I made a lot of memories in, which had closed down recently at the time of making this program.
@@ -14,4 +15,5 @@ This program features employee accounts with various levels of privilege, user a
 
 ## How to run
 
-- Run `__main.py__` from an IDE or directly via Command Prompt: `py __main.py__`
+- Install Comfortaa.ttf and Montserrat.ttf (by right click > Install if you're on Windows)
+- Run `__main.py__` from an IDE or directly via terminal: `py __main.py__`
