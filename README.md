@@ -10,3 +10,8 @@ This program features employee accounts with various levels of privilege, user a
 
 1. [Comfortaa](https://fonts.google.com/specimen/Comfortaa)
 2. [Montserrat](https://fonts.google.com/specimen/Comfortaa)
+3. [Python 3](https://www.python.org/downloads/)
+
+## How to run
+
+- Run `__main.py__` from an IDE or directly via Command Prompt: `py __main.py__`
