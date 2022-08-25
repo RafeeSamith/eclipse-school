@@ -9,5 +9,4 @@ https://fonts.google.com/specimen/Montserrat
 from modules import tkmenus
 from modules import fileHandling
 
-#tkmenus.firstMenu()
-tkmenus.about({"empno": 0, "email": "", "password": "", "role": 3})
+tkmenus.firstMenu()
